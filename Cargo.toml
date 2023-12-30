@@ -7,6 +7,10 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4.4.0"
+actix-web-httpauth = "0.8.1"
 chrono = { version = "0.4.31", features = ["serde"] }
 diesel = { version = "2.1.4", features = ["postgres", "chrono"] }
 dotenv = "0.15.0"
+futures-util = "0.3.30"
+jsonwebtoken = "9.2.0"
+serde = "1.0.193"
