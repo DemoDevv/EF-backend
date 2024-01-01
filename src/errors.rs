@@ -29,16 +29,6 @@ impl ServiceError {
     }
 }
 
-impl From<jsonwebtoken::errors::Error> for ServiceError {
-    fn from(error: jsonwebtoken::errors::Error) -> Self {
-        ServiceError {
-            message: None,
-            cause: Some(error.to_string()),
-            error_type: ServiceErrorType::BadAuthentification
-        }
-    }
-}
-
 impl ResponseError for ServiceError {
     fn status_code(&self) -> actix_web::http::StatusCode {
         match self.error_type {
