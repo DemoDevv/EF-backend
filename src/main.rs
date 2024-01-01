@@ -8,8 +8,8 @@ mod models;
 mod db;
 mod schema;
 mod config;
-mod middleware;
 mod auth;
+mod errors;
 
 pub struct AppState {
     pub env: Config
