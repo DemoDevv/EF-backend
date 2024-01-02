@@ -22,9 +22,7 @@ async fn main() -> std::io::Result<()> {
 
     let config = Config::init();
 
-    println!("[INFO]: Démarrage du back-end.");
-    println!("[INFO]: Connexion à la base de données réussite.");
-    println!("[INFO]: Le back-end écoute sur le port 8080 à l'adresse 127.0.0.1.");
+    println!("🚀 Démarrage du back-end.");
 
     HttpServer::new(move || {
         App::new()
