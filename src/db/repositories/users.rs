@@ -1,6 +1,6 @@
 use diesel::{PgConnection, SelectableHelper, RunQueryDsl};
 
-use crate::schema::users;
+use crate::db::schema::users;
 use crate::models::user::{User, NewUser};
 
 pub struct UsersRepository {}

@@ -9,7 +9,6 @@ mod handlers;
 mod extractors;
 mod models;
 mod db;
-mod schema;
 mod config;
 mod auth;
 mod errors;
