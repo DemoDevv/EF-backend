@@ -5,11 +5,12 @@ use actix_web::{ResponseError, http::StatusCode, HttpResponse};
 #[derive(Debug)]
 pub enum ServiceErrorType {
     BadAuthentification,
+    InternalServerError,
+    BadDeserialization,
 }
 
 #[derive(Debug)]
 pub struct ServiceError {
-    pub cause: Option<String>,
     pub message: Option<String>,
     pub error_type: ServiceErrorType
 }
@@ -33,6 +34,8 @@ impl ResponseError for ServiceError {
     fn status_code(&self) -> actix_web::http::StatusCode {
         match self.error_type {
             ServiceErrorType::BadAuthentification => StatusCode::UNAUTHORIZED,
+            ServiceErrorType::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
+            ServiceErrorType::BadDeserialization => StatusCode::BAD_REQUEST
         }
     }
 
