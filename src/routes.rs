@@ -4,6 +4,7 @@ use actix_web_httpauth::middleware::HttpAuthentication;
 use crate::handlers::auth::{login, register};
 use crate::handlers::health::status;
 use crate::auth::middleware::validator;
+use crate::handlers::secure::test;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
@@ -19,6 +20,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .service(
             web::scope("/secure")
             .wrap(HttpAuthentication::bearer(validator))
+            .service(web::resource("/test").route(web::get().to(test)))
         )
     );
 }
