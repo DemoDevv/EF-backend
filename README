@@ -1,0 +1,2 @@
+if you want to start with hot reload, use this command in your terminal:  
+`cargo watch -q -c -w src/ -x run`
