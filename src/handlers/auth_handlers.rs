@@ -1,7 +1,7 @@
 use actix_web::{Error, HttpResponse, web};
 
 use crate::db::{connection::Pool, repositories::users::UsersRepository};
-use crate::extractors::user::InputUser;
+use crate::extractors::user_extractor::InputUser;
 use crate::errors::{ServiceError, ServiceErrorType};
 use crate::config::Config;
 use crate::auth::services::create_valid_token;

@@ -1,10 +1,10 @@
 use actix_web::web;
 use actix_web_httpauth::middleware::HttpAuthentication;
 
-use crate::handlers::auth::{login, register};
-use crate::handlers::health::status;
+use crate::handlers::auth_handlers::{login, register};
+use crate::handlers::health_handlers::status;
 use crate::auth::middleware::validator;
-use crate::handlers::secure::test;
+use crate::handlers::secure_handlers::test;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(

@@ -1,4 +1,4 @@
 // define rs file in handlers dir
-pub mod auth;
-pub mod health;
-pub mod secure; // dev only for now
+pub mod auth_handlers;
+pub mod health_handlers;
+pub mod secure_handlers; // dev only for now
