@@ -9,11 +9,7 @@ use super::claims::TokenClaims;
 pub fn validate_token(req: &ServiceRequest, token: &str) -> Result<TokenData<TokenClaims>, ServiceError> {
     let config = req.app_data::<web::Data<Config>>().unwrap();
 
-    // suppresion du leeway pour pouvoir exp le token avant 1 minute
-    let mut validation = Validation::new(Algorithm::HS256);
-    validation.leeway = 1;
-
-    let claims = decode::<TokenClaims>(&token, &DecodingKey::from_secret(config.jwt_secret.as_ref()), &validation);
+    let claims = decode_token(config.clone(), token);
 
     match claims {
         Ok(token_data) => Ok(token_data),
@@ -41,4 +37,12 @@ pub fn create_valid_token(config: web::Data<Config>, user: &User) -> Result<Stri
             error_type: ServiceErrorType::InternalServerError
         })
     }
+}
+
+pub fn decode_token(config: web::Data<Config>, token: &str) -> Result<TokenData<TokenClaims>, jsonwebtoken::errors::Error> {
+    // suppresion du leeway pour pouvoir exp le token avant 1 minute
+    let mut validation = Validation::new(Algorithm::HS256);
+    validation.leeway = 1;
+
+    decode::<TokenClaims>(&token, &DecodingKey::from_secret(config.jwt_secret.as_ref()), &validation)
 }
