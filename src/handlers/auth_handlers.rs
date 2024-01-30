@@ -1,6 +1,6 @@
 use actix_web::{Error, HttpResponse, web};
 
-use crate::db::{connection::Pool, repositories::users::UsersRepository};
+use crate::db::{connection::Pool, repositories::users_repository::UsersRepository};
 use crate::extractors::user_extractor::InputUser;
 use crate::errors::{ServiceError, ServiceErrorType};
 use crate::config::Config;

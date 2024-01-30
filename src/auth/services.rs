@@ -28,9 +28,9 @@ pub fn validate_token(req: &ServiceRequest, token: &str) -> Result<TokenData<Tok
 
 pub fn create_valid_token(config: web::Data<Config>, user: &User) -> Result<String, ServiceError> {
     let iat = OffsetDateTime::now_utc();
-    let exp = iat + Duration::seconds(25);
+    let exp = iat + Duration::minutes(config.jwt_expired_in);
 
-    let claims = TokenClaims::new(user.email.clone(), iat, exp, "admin".to_string());
+    let claims = TokenClaims::new(user.email.clone(), iat, exp, user.role.clone());
 
     let token = encode(&Header::default(), &claims, &EncodingKey::from_secret(config.jwt_secret.as_ref()));
 

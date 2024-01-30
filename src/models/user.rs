@@ -14,6 +14,7 @@ pub struct User {
     pub created_at: chrono::NaiveDateTime,
     pub password: String,
     pub salt: String,
+    pub role: String
 }
 
 #[derive(Insertable)]
@@ -25,4 +26,5 @@ pub struct NewUser<'a> {
     pub created_at: chrono::NaiveDateTime,
     pub password: &'a str,
     pub salt: &'a str,
+    pub role: &'a str,
 }

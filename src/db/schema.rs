@@ -9,5 +9,6 @@ diesel::table! {
         password -> Text,
         salt -> Text,
         created_at -> Timestamp,
+        role -> Text,
     }
 }

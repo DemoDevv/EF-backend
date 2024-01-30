@@ -12,6 +12,7 @@ mod db;
 mod config;
 mod auth;
 mod errors;
+mod types;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

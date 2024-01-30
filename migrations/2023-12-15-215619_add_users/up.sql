@@ -5,5 +5,6 @@ CREATE TABLE users (
   email TEXT NOT NULL,
   password TEXT NOT NULL,
   salt TEXT NOT NULL,
-  created_at TIMESTAMP NOT NULL
+  created_at TIMESTAMP NOT NULL,
+  role TEXT NOT NULL
 );
