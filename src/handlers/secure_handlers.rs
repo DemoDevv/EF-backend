@@ -1,4 +1,4 @@
-use actix_web::{Error, HttpResponse, web};
+use actix_web::{web, Error, HttpResponse};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 
 use crate::auth::services::decode_token;

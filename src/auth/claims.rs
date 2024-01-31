@@ -10,8 +10,8 @@ pub struct TokenClaims {
 
     #[serde(with = "jwt_numeric_date")]
     pub exp: OffsetDateTime,
-    
-    pub role: String
+
+    pub role: String,
 }
 
 impl TokenClaims {
@@ -32,7 +32,7 @@ impl TokenClaims {
             sub,
             iat,
             exp,
-            role
+            role,
         }
     }
 }

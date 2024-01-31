@@ -1,6 +1,6 @@
 use std::fmt;
 
-use actix_web::{ResponseError, http::StatusCode, HttpResponse};
+use actix_web::{http::StatusCode, HttpResponse, ResponseError};
 
 #[derive(Debug)]
 pub enum ServiceErrorType {
@@ -12,7 +12,7 @@ pub enum ServiceErrorType {
 #[derive(Debug)]
 pub struct ServiceError {
     pub message: Option<String>,
-    pub error_type: ServiceErrorType
+    pub error_type: ServiceErrorType,
 }
 
 impl fmt::Display for ServiceError {
@@ -35,13 +35,11 @@ impl ResponseError for ServiceError {
         match self.error_type {
             ServiceErrorType::BadAuthentification => StatusCode::UNAUTHORIZED,
             ServiceErrorType::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
-            ServiceErrorType::BadDeserialization => StatusCode::BAD_REQUEST
+            ServiceErrorType::BadDeserialization => StatusCode::BAD_REQUEST,
         }
     }
 
     fn error_response(&self) -> actix_web::HttpResponse<actix_web::body::BoxBody> {
-        HttpResponse::build(self.status_code()).json(
-            self.message()
-        )
+        HttpResponse::build(self.status_code()).json(self.message())
     }
 }
