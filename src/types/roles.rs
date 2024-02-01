@@ -5,10 +5,10 @@ pub enum Role {
 }
 
 impl Role {
-    pub fn to_string(&self) -> &str {
+    pub fn to_string(&self) -> String {
         match self {
-            Role::Admin => "admin",
-            Role::User => "user",
+            Role::Admin => "admin".to_string(),
+            Role::User => "user".to_string(),
         }
     }
 }

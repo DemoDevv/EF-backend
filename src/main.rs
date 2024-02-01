@@ -18,6 +18,8 @@ mod types;
 async fn main() -> std::io::Result<()> {
     let pg_connection: Pool = db::connection::establish_connection(); // ne pas utiliser en appdate (enfin a vérifier)
 
+    let users_repository = db::repositories::users_repository::UsersRepository::new(pg_connection.clone());
+
     let config: Config = Config::init();
 
     println!("🚀 Démarrage du back-end.");
@@ -32,7 +34,7 @@ async fn main() -> std::io::Result<()> {
                 .into()
             }))
             .app_data(web::Data::new(config.clone()))
-            .app_data(web::Data::new(pg_connection.clone()))
+            .app_data(web::Data::new(users_repository.clone()))
             .wrap(Logger::default())
             .configure(routes::config)
     })
