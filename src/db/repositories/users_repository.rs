@@ -1,13 +1,20 @@
 use diesel::query_dsl::methods::{FilterDsl, SelectDsl};
 use diesel::{ExpressionMethods, OptionalExtension, PgConnection, RunQueryDsl, SelectableHelper};
 
+use crate::db::connection::Pool;
 use crate::db::schema::users;
 use crate::models::user::{NewUser, User};
 use crate::types::roles::Role;
 
-pub struct UsersRepository {}
+pub struct UsersRepository {
+    conn: Pool
+}
 
 impl UsersRepository {
+    pub fn new(conn: Pool) -> Self {
+        Self { conn }
+    }
+
     pub fn create_new_user(conn: &mut PgConnection, email: &str, password: &str) -> User {
         let new_user = NewUser {
             first_name: "Jhon",
