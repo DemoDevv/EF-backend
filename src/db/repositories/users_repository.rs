@@ -1,4 +1,5 @@
-use diesel::{PgConnection, RunQueryDsl, SelectableHelper};
+use diesel::query_dsl::methods::{FilterDsl, SelectDsl};
+use diesel::{ExpressionMethods, OptionalExtension, PgConnection, RunQueryDsl, SelectableHelper};
 
 use crate::db::schema::users;
 use crate::models::user::{NewUser, User};
@@ -23,5 +24,14 @@ impl UsersRepository {
             .returning(User::as_returning())
             .get_result(conn)
             .expect("Error saving new user")
+    }
+
+    pub fn find_user_by_email(conn: &mut PgConnection, email: &str) -> Option<User> {
+        users::table
+            .filter(users::email.eq(email))
+            .select(User::as_select())
+            .first(conn)
+            .optional()
+            .expect("Error finding user by email")
     }
 }
