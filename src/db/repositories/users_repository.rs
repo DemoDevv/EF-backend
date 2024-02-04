@@ -30,7 +30,7 @@ impl Repository<User, NewUser> for UsersRepository {
                 &mut self
                     .conn
                     .get()
-                    .expect("couldn't get db connection from pool"),
+                    .expect("couldn't get db connection from pool"), // FIXME: handle the error
             )
             .map_err(|_| ServiceError {
                 message: Some("Error getting user".to_string()),
@@ -45,7 +45,7 @@ impl Repository<User, NewUser> for UsersRepository {
                 &mut self
                     .conn
                     .get()
-                    .expect("couldn't get db connection from pool"),
+                    .expect("couldn't get db connection from pool"), // FIXME: handle the error
             )
             .map_err(|_| ServiceError {
                 message: Some("Error getting all users".to_string()),
@@ -71,7 +71,7 @@ impl Repository<User, NewUser> for UsersRepository {
                 &mut self
                     .conn
                     .get()
-                    .expect("couldn't get db connection from pool"),
+                    .expect("couldn't get db connection from pool"), // FIXME: handle the error
             )
             .map_err(|_| ServiceError {
                 message: Some("Error saving new user".to_string()),
@@ -98,7 +98,7 @@ impl UserRepository for UsersRepository {
                 &mut self
                     .conn
                     .get()
-                    .expect("couldn't get db connection from pool"),
+                    .expect("couldn't get db connection from pool"), // FIXME: handle the error
             )
             .map_err(|_| ServiceError {
                 message: Some("Error getting user".to_string()),
