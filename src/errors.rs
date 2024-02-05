@@ -7,6 +7,7 @@ pub enum ServiceErrorType {
     BadAuthentification,
     InternalServerError,
     BadDeserialization,
+    DatabaseError,
 }
 
 #[derive(Debug)]
@@ -36,6 +37,7 @@ impl ResponseError for ServiceError {
             ServiceErrorType::BadAuthentification => StatusCode::UNAUTHORIZED,
             ServiceErrorType::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
             ServiceErrorType::BadDeserialization => StatusCode::BAD_REQUEST,
+            ServiceErrorType::DatabaseError => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 

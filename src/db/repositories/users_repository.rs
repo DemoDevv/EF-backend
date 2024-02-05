@@ -26,12 +26,10 @@ impl Repository<User, NewUser> for UsersRepository {
         users::table
             .filter(users::id.eq(id))
             .select(User::as_select())
-            .first(
-                &mut self
-                    .conn
-                    .get()
-                    .expect("couldn't get db connection from pool"), // FIXME: handle the error
-            )
+            .first(&mut self.conn.get().map_err(|_| ServiceError {
+                message: Some("Error for getting connection to the database".to_string()),
+                error_type: crate::errors::ServiceErrorType::DatabaseError,
+            })?)
             .map_err(|_| ServiceError {
                 message: Some("Error getting user".to_string()),
                 error_type: crate::errors::ServiceErrorType::InternalServerError,
@@ -41,12 +39,10 @@ impl Repository<User, NewUser> for UsersRepository {
     async fn get_all(&self) -> RepositoryResult<Vec<User>> {
         users::table
             .select(User::as_select())
-            .load(
-                &mut self
-                    .conn
-                    .get()
-                    .expect("couldn't get db connection from pool"), // FIXME: handle the error
-            )
+            .load(&mut self.conn.get().map_err(|_| ServiceError {
+                message: Some("Error for getting connection to the database".to_string()),
+                error_type: crate::errors::ServiceErrorType::DatabaseError,
+            })?)
             .map_err(|_| ServiceError {
                 message: Some("Error getting all users".to_string()),
                 error_type: crate::errors::ServiceErrorType::InternalServerError,
@@ -67,12 +63,10 @@ impl Repository<User, NewUser> for UsersRepository {
         diesel::insert_into(users::table)
             .values(insertable_user)
             .returning(User::as_returning())
-            .get_result(
-                &mut self
-                    .conn
-                    .get()
-                    .expect("couldn't get db connection from pool"), // FIXME: handle the error
-            )
+            .get_result(&mut self.conn.get().map_err(|_| ServiceError {
+                message: Some("Error for getting connection to the database".to_string()),
+                error_type: crate::errors::ServiceErrorType::DatabaseError,
+            })?)
             .map_err(|_| ServiceError {
                 message: Some("Error saving new user".to_string()),
                 error_type: crate::errors::ServiceErrorType::InternalServerError,
@@ -94,12 +88,10 @@ impl UserRepository for UsersRepository {
         users::table
             .filter(users::email.eq(email))
             .select(User::as_select())
-            .first(
-                &mut self
-                    .conn
-                    .get()
-                    .expect("couldn't get db connection from pool"), // FIXME: handle the error
-            )
+            .first(&mut self.conn.get().map_err(|_| ServiceError {
+                message: Some("Error for getting connection to the database".to_string()),
+                error_type: crate::errors::ServiceErrorType::DatabaseError,
+            })?)
             .map_err(|_| ServiceError {
                 message: Some("Error getting user".to_string()),
                 error_type: crate::errors::ServiceErrorType::InternalServerError,
