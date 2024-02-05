@@ -19,9 +19,28 @@ pub fn service<R: UserRepository>(cfg: &mut web::ServiceConfig) {
 pub async fn login<R: UserRepository>(
     config: web::Data<Config>,
     repo: web::Data<R>,
-    user: web::Json<InputUser>,
+    user_json: web::Json<InputUser>,
 ) -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().json("login endpoint"))
+    let generique_error = ServiceError {
+        message: Some("Authentification failed".to_string()),
+        error_type: ServiceErrorType::BadAuthentification,
+    };
+
+    let user = match repo.get_user_by_email(&user_json.email).await {
+        Ok(user) => {
+            // TODO: utiliser des hash pour tester si le mot de passe est bon
+            if user.password != user_json.password {
+                Err(generique_error)
+            } else {
+                Ok(user)
+            }
+        }
+        Err(_) => Err(generique_error),
+    }?;
+
+    let token = create_valid_token(config, &user)?;
+
+    Ok(HttpResponse::Ok().json(token))
 }
 
 pub async fn register<R: UserRepository>(
@@ -31,21 +50,29 @@ pub async fn register<R: UserRepository>(
 ) -> Result<HttpResponse, Error> {
     let user = match repo.get_user_by_email(&user.email).await {
         Ok(_) => Err(ServiceError {
-            message: Some("l'utilisateur existe déjà".to_string()), // the message has to be more generic
+            message: Some("User already exist".to_string()), // the message has to be more generic
             error_type: ServiceErrorType::InternalServerError,
         }),
-        // FIXME: the error can be different of the not found error
-        Err(_) => {
-            repo.create(&NewUser {
-                first_name: "Jhon".to_string(),
-                last_name: "Doe".to_string(),
-                email: user.email.to_string(),
-                created_at: chrono::Local::now().naive_local(),
-                password: user.password.to_string(),
-                salt: "salt_test".to_string(),
-                role: Role::User.to_string(),
-            })
-            .await
+        // the error can be different of the not found error and in this case we don't want to create the user
+        Err(e) => {
+            match e.error_type {
+                ServiceErrorType::DatabaseError => Err(ServiceError {
+                    message: Some("Error getting user".to_string()),
+                    error_type: ServiceErrorType::InternalServerError,
+                }),
+                _ => {
+                    repo.create(&NewUser {
+                        first_name: "Jhon".to_string(),
+                        last_name: "Doe".to_string(),
+                        email: user.email.to_string(),
+                        created_at: chrono::Local::now().naive_local(),
+                        password: user.password.to_string(),
+                        salt: "salt_test".to_string(),
+                        role: Role::User.to_string(),
+                    })
+                    .await
+                }
+            }
         }
     }?;
 
