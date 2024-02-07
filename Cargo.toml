@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 actix-web = "4.4.0"
 actix-web-httpauth = "0.8.1"
+argon2 = "0.5.3"
 async-trait = "0.1.77"
 chrono = { version = "0.4.31", features = ["serde"] }
 diesel = { version = "2.1.4", features = ["postgres", "chrono", "r2d2"] }

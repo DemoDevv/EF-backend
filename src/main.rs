@@ -10,6 +10,7 @@ mod db;
 mod errors;
 mod extractors;
 mod handlers;
+mod helpers;
 mod models;
 mod routes;
 mod types;
