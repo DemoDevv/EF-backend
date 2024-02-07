@@ -7,7 +7,6 @@ diesel::table! {
         last_name -> Text,
         email -> Text,
         password -> Text,
-        salt -> Text,
         created_at -> Timestamp,
         role -> Text,
     }

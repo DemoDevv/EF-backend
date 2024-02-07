@@ -13,7 +13,6 @@ pub struct User {
     pub email: String,
     pub created_at: chrono::NaiveDateTime,
     pub password: String,
-    pub salt: String,
     pub role: String,
 }
 
@@ -25,6 +24,5 @@ pub struct InsertableUser<'a> {
     pub email: &'a str,
     pub created_at: chrono::NaiveDateTime,
     pub password: &'a str,
-    pub salt: &'a str,
     pub role: &'a str,
 }
