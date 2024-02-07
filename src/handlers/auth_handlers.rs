@@ -1,10 +1,13 @@
 use actix_web::{web, Error, HttpResponse};
+use argon2::PasswordHash;
 
 use crate::auth::services::create_valid_token;
+use crate::auth::errors::AuthentificationError;
 use crate::config::Config;
 use crate::db::repositories::repository::UserRepository;
 use crate::errors::{ServiceError, ServiceErrorType};
 use crate::extractors::user_extractor::InputUser;
+use crate::helpers::{hash_password, verify_password};
 use crate::types::roles::Role;
 use crate::types::user::NewUser;
 
@@ -27,13 +30,15 @@ pub async fn login<R: UserRepository>(
     };
 
     let user = match repo.get_user_by_email(&user_json.email).await {
-        Ok(user) => {
-            // TODO: utiliser des hash pour tester si le mot de passe est bon
-            if user.password != user_json.password {
-                Err(generique_error)
-            } else {
-                Ok(user)
-            }
+        Ok(user_from_the_db) => {
+            // we parse the hash from the database
+            let parsed_hash = PasswordHash::new(&user_from_the_db.password).map_err(|err| AuthentificationError::from(err)).map_err(|err| ServiceError::from(err))?;
+
+            // we verify the hash with the hash from the user
+            verify_password(&user_json.password, &parsed_hash).map_err(|err| ServiceError::from(err))?;
+
+            // we don't have error so we return the user
+            Ok(user_from_the_db)
         }
         Err(_) => Err(generique_error),
     }?;
@@ -61,13 +66,15 @@ pub async fn register<R: UserRepository>(
                     error_type: ServiceErrorType::InternalServerError,
                 }),
                 _ => {
+                    // password hashing
+                    let hash = hash_password(&user.password).map_err(|err| ServiceError::from(err))?;
+
                     repo.create(&NewUser {
                         first_name: "Jhon".to_string(),
                         last_name: "Doe".to_string(),
                         email: user.email.to_string(),
                         created_at: chrono::Local::now().naive_local(),
-                        password: user.password.to_string(),
-                        salt: "salt_test".to_string(),
+                        password: hash,
                         role: Role::User.to_string(),
                     })
                     .await
