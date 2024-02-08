@@ -4,6 +4,5 @@ pub struct NewUser {
     pub email: String,
     pub created_at: chrono::NaiveDateTime,
     pub password: String,
-    pub salt: String,
     pub role: String,
 }

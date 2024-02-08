@@ -45,3 +45,12 @@ impl ResponseError for ServiceError {
         HttpResponse::build(self.status_code()).json(self.message())
     }
 }
+
+impl std::convert::From<crate::auth::errors::AuthentificationError> for ServiceError {
+    fn from(error: crate::auth::errors::AuthentificationError) -> Self {
+        ServiceError {
+            message: Some("Authentification failed".to_string()),
+            error_type: ServiceErrorType::BadAuthentification,
+        }
+    }
+}

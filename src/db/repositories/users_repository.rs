@@ -56,7 +56,6 @@ impl Repository<User, NewUser> for UsersRepository {
             email: &item.email,
             created_at: chrono::Local::now().naive_local(),
             password: &item.password,
-            salt: &item.salt,
             role: &item.role,
         };
 
