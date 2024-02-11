@@ -1,4 +1,4 @@
-# EF-backend
+# EF-backend 
 
 Ce projet est une application web construite avec le framework Actix-web en Rust. Il utilise Diesel pour interagir avec une base de données PostgreSQL et implémente une authentification basée sur des tokens JWT.
 
@@ -20,6 +20,8 @@ Le projet est organisé en plusieurs modules principaux :
 - Middleware pour la validation des tokens JWT.
 - Gestion des erreurs personnalisée.
 
+  if you want to start with hot reload, use this command in your terminal:  
+`cargo watch -q -c -w src/ -x run`
 
 ## Améliorations futures
 
@@ -54,6 +56,3 @@ Pour exécuter les tests, utilisez la commande `cargo test`.
 ## Licence
 
 Ce projet est privé et n'est pas destiné à être distribué ou utilisé par d'autres personnes sans permission.
-
-if you want to start with hot reload, use this command in your terminal:  
-`cargo watch -q -c -w src/ -x run`
