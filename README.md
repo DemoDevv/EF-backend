@@ -2,7 +2,7 @@
 
 Ce projet est une application web construite avec le framework Actix-web en Rust. Il utilise Diesel pour interagir avec une base de données PostgreSQL et implémente une authentification basée sur des tokens JWT.
 
-## Structure du projet
+## Structure du projet 
 
 Le projet est organisé en plusieurs modules principaux :
 
