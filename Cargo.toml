@@ -19,3 +19,4 @@ r2d2 = "0.8.10"
 serde = "1.0.193"
 time = "0.3.31"
 tokio = "1.35.1"
+validator = { version = "0.16", features = ["derive"] }
