@@ -273,6 +273,7 @@ dependencies = [
  "async-trait",
  "chrono",
  "diesel",
+ "dotenv",
  "futures-util",
  "serde",
  "shared",
@@ -285,8 +286,8 @@ version = "0.1.0"
 dependencies = [
  "actix-web",
  "api-lib",
+ "dotenv",
  "shared",
- "validator",
 ]
 
 [[package]]
@@ -1299,7 +1300,6 @@ dependencies = [
  "async-trait",
  "chrono",
  "diesel",
- "dotenv",
  "futures-util",
  "jsonwebtoken",
  "r2d2",
