@@ -1,6 +1,6 @@
 use actix_web::{web, Error, HttpResponse};
 
-use crate::config::Config;
+use shared::config::Config;
 
 pub fn service(cfg: &mut web::ServiceConfig) {
     cfg.service(web::resource("/status").route(web::get().to(status)));

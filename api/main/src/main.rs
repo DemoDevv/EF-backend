@@ -1,27 +1,17 @@
 use actix_web::{middleware::Logger, web, App, HttpServer};
 
-use config::Config;
-use db::connection::Pool;
-use errors::{ServiceError, ServiceErrorType};
+use shared::db::connection::Pool;
+use shared::errors::{ServiceError, ServiceErrorType};
 
-mod auth;
-mod config;
-mod db;
-mod errors;
-mod extractors;
-mod handlers;
-mod helpers;
-mod models;
 mod routes;
-mod types;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let pg_connection: Pool = db::connection::establish_connection(); // ne pas utiliser en appdate (enfin a vérifier)
+    let pg_connection: Pool = shared::db::connection::establish_connection(); // ne pas utiliser en appdate (enfin a vérifier)
 
-    let users_repository = db::repositories::users_repository::UsersRepository::new(pg_connection.clone());
+    let users_repository = api_lib::repositories::users_repository::UsersRepository::new(pg_connection.clone());
 
-    let config: Config = Config::init();
+    let config = shared::config::Config::init();
 
     println!("🚀 Démarrage du back-end.");
 
@@ -43,3 +33,4 @@ async fn main() -> std::io::Result<()> {
     .run()
     .await
 }
+

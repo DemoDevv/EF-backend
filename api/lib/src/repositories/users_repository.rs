@@ -1,13 +1,13 @@
 use diesel::query_dsl::methods::{FilterDsl, SelectDsl};
 use diesel::{ExpressionMethods, RunQueryDsl, SelectableHelper};
 
-use crate::db::connection::Pool;
-use crate::db::schema::users;
-use crate::errors::ServiceError;
-use crate::models::user::{InsertableUser, User};
-use crate::types::user::NewUser;
+use shared::db::connection::Pool;
+use shared::db::schema::users;
+use shared::errors::ServiceError;
+use shared::models::user::{InsertableUser, User};
+use shared::types::user::NewUser;
 
-use super::repository::{Repository, RepositoryResult, UserRepository};
+use shared::db::repository::{Repository, RepositoryResult, UserRepository};
 
 #[derive(Clone)]
 pub struct UsersRepository {
@@ -28,11 +28,11 @@ impl Repository<User, NewUser> for UsersRepository {
             .select(User::as_select())
             .first(&mut self.conn.get().map_err(|_| ServiceError {
                 message: Some("Error for getting connection to the database".to_string()),
-                error_type: crate::errors::ServiceErrorType::DatabaseError,
+                error_type: shared::errors::ServiceErrorType::DatabaseError,
             })?)
             .map_err(|_| ServiceError {
                 message: Some("Error getting user".to_string()),
-                error_type: crate::errors::ServiceErrorType::InternalServerError,
+                error_type: shared::errors::ServiceErrorType::InternalServerError,
             })
     }
 
@@ -41,11 +41,11 @@ impl Repository<User, NewUser> for UsersRepository {
             .select(User::as_select())
             .load(&mut self.conn.get().map_err(|_| ServiceError {
                 message: Some("Error for getting connection to the database".to_string()),
-                error_type: crate::errors::ServiceErrorType::DatabaseError,
+                error_type: shared::errors::ServiceErrorType::DatabaseError,
             })?)
             .map_err(|_| ServiceError {
                 message: Some("Error getting all users".to_string()),
-                error_type: crate::errors::ServiceErrorType::InternalServerError,
+                error_type: shared::errors::ServiceErrorType::InternalServerError,
             })
     }
 
@@ -64,11 +64,11 @@ impl Repository<User, NewUser> for UsersRepository {
             .returning(User::as_returning())
             .get_result(&mut self.conn.get().map_err(|_| ServiceError {
                 message: Some("Error for getting connection to the database".to_string()),
-                error_type: crate::errors::ServiceErrorType::DatabaseError,
+                error_type: shared::errors::ServiceErrorType::DatabaseError,
             })?)
             .map_err(|_| ServiceError {
                 message: Some("Error saving new user".to_string()),
-                error_type: crate::errors::ServiceErrorType::InternalServerError,
+                error_type: shared::errors::ServiceErrorType::InternalServerError,
             })
     }
 
@@ -89,11 +89,11 @@ impl UserRepository for UsersRepository {
             .select(User::as_select())
             .first(&mut self.conn.get().map_err(|_| ServiceError {
                 message: Some("Error for getting connection to the database".to_string()),
-                error_type: crate::errors::ServiceErrorType::DatabaseError,
+                error_type: shared::errors::ServiceErrorType::DatabaseError,
             })?)
             .map_err(|_| ServiceError {
                 message: Some("Error getting user".to_string()),
-                error_type: crate::errors::ServiceErrorType::InternalServerError,
+                error_type: shared::errors::ServiceErrorType::InternalServerError,
             })
     }
 }

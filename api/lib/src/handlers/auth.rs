@@ -2,15 +2,16 @@ use actix_web::{web, Error, HttpResponse};
 use argon2::PasswordHash;
 use validator::Validate;
 
-use crate::auth::services::create_valid_token;
-use crate::auth::errors::AuthentificationError;
-use crate::config::Config;
-use crate::db::repositories::repository::UserRepository;
-use crate::errors::{ServiceError, ServiceErrorType};
-use crate::extractors::user_extractor::InputUser;
-use crate::helpers::{hash_password, verify_password};
-use crate::types::roles::Role;
-use crate::types::user::NewUser;
+use shared::auth::services::create_valid_token;
+
+use shared::auth::errors::AuthentificationError;
+use shared::config::Config;
+use shared::db::repository::UserRepository;
+use shared::errors::{ServiceError, ServiceErrorType};
+use shared::extractors::user_extractor::InputUser;
+use shared::helpers::{hash_password, verify_password};
+use shared::types::roles::Role;
+use shared::types::user::NewUser;
 
 pub fn service<R: UserRepository>(cfg: &mut web::ServiceConfig) {
     cfg.service(
