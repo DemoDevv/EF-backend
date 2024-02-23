@@ -72,11 +72,11 @@ impl Repository<User, NewUser> for UsersRepository {
             })
     }
 
-    async fn update(&self, id: i32, item: &User) -> RepositoryResult<User> {
+    async fn update(&self, _id: i32, _item: &User) -> RepositoryResult<User> {
         todo!("update user by id")
     }
 
-    async fn delete(&self, id: i32) -> RepositoryResult<i32> {
+    async fn delete(&self, _id: i32) -> RepositoryResult<i32> {
         todo!("delete user by id")
     }
 }
