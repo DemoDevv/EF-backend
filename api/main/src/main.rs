@@ -7,6 +7,8 @@ mod routes;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    dotenv::dotenv().ok();
+
     let pg_connection: Pool = shared::db::connection::establish_connection(); // ne pas utiliser en appdate (enfin a vérifier)
 
     let users_repository = api_lib::repositories::users_repository::UsersRepository::new(pg_connection.clone());
