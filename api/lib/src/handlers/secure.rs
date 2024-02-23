@@ -2,9 +2,9 @@ use actix_web::{web, Error, HttpResponse};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use actix_web_httpauth::middleware::HttpAuthentication;
 
-use crate::auth::middleware::validator;
-use crate::auth::services::decode_token;
-use crate::config::Config;
+use shared::auth::middleware::validator;
+use shared::auth::services::decode_token;
+use shared::config::Config;
 
 pub fn service(cfg: &mut web::ServiceConfig) {
     cfg.service(

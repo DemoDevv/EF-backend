@@ -1,0 +1,21 @@
+[package]
+name = "shared"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+actix-web = "4.4.0"
+chrono = { version = "0.4.31", features = ["serde"] }
+diesel = { version = "2.1.4", features = ["postgres", "chrono", "r2d2"] }
+dotenv = "0.15.0"
+r2d2 = "0.8.10"
+serde = "1.0.193"
+async-trait = "0.1.77"
+futures-util = "0.3.30"
+time = "0.3.31"
+jsonwebtoken = "9.2.0"
+argon2 = "0.5.3"
+actix-web-httpauth = "0.8.1"
+validator = { version = "0.16", features = ["derive"] }
