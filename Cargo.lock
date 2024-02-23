@@ -276,6 +276,7 @@ dependencies = [
  "dotenv",
  "futures-util",
  "serde",
+ "serde_json",
  "shared",
  "validator",
 ]
