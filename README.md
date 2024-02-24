@@ -41,6 +41,8 @@ Le projet est organisé en plusieurs modules principaux :
 
 - **Amélioration de la gestion des erreurs** : Vous pourriez améliorer la gestion des erreurs en fournissant des messages d'erreur plus détaillés et en gérant plus de cas d'erreur potentiels.
 
+- **Ajout d'une mise en cache Redis** : Le backend fournira une mise en cache efficace pour des gestions de session ou autres.
+
 ## Comment exécuter le projet
 
 1. Assurez-vous d'avoir Rust et Diesel CLI installés sur votre machine.
