@@ -4,11 +4,12 @@ use jsonwebtoken::{
 };
 use time::{Duration, OffsetDateTime};
 
-use crate::{
+use shared::{
     config::Config,
     errors::{ServiceError, ServiceErrorType},
-    models::user::User,
 };
+
+use api_db::models::user::User;
 
 use super::claims::TokenClaims;
 

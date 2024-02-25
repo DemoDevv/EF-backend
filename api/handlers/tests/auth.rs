@@ -1,9 +1,9 @@
 use actix_web::{http::StatusCode, web, App};
 
-use api_lib::handlers::auth;
-use api_lib::repositories::users_repository::UsersRepository;
+use api_handlers::auth;
+use api_db::repositories::users_repository::UsersRepository;
 
-use shared::db::repository::Repository;
+use api_db::repository::Repository;
 use shared::types::user::NewUser;
 use shared::types::roles::Role;
 
@@ -12,7 +12,7 @@ async fn test_login_with_bad_credentials() {
     dotenv::dotenv().ok(); // ne pas oublier de charger les variables d'environnement
     let config = shared::config::Config::init();
 
-    let users_repository = UsersRepository::new(shared::db::connection::establish_connection());
+    let users_repository = UsersRepository::new(api_db::connection::establish_connection());
 
     let app = App::new()
         .app_data(web::Data::new(config))
@@ -37,11 +37,11 @@ async fn test_login_with_good_credentials() {
     dotenv::dotenv().ok(); // ne pas oublier de charger les variables d'environnement
     let config = shared::config::Config::init();
 
-    let users_repository = UsersRepository::new(shared::db::connection::establish_connection());
+    let users_repository = UsersRepository::new(api_db::connection::establish_connection());
 
     let good_email = "goodemail@test.com";
     let good_password = "password";
-    let hash = shared::helpers::hash_password(good_password).unwrap();
+    let hash = api_services::auth::helpers::hash_password(good_password).unwrap();
 
     // Create a valid user
     let _ = users_repository.create(&NewUser {
@@ -80,7 +80,7 @@ async fn test_register_with_email_already_exist() {
     dotenv::dotenv().ok(); // ne pas oublier de charger les variables d'environnement
     let config = shared::config::Config::init();
 
-    let users_repository = UsersRepository::new(shared::db::connection::establish_connection());
+    let users_repository = UsersRepository::new(api_db::connection::establish_connection());
 
     let app = App::new()
         .app_data(web::Data::new(config))
@@ -105,7 +105,7 @@ async fn test_register_with_email_not_already_exist() {
     dotenv::dotenv().ok(); // ne pas oublier de charger les variables d'environnement
     let config = shared::config::Config::init();
 
-    let users_repository = UsersRepository::new(shared::db::connection::establish_connection());
+    let users_repository = UsersRepository::new(api_db::connection::establish_connection());
 
     let app = App::new()
         .app_data(web::Data::new(config))

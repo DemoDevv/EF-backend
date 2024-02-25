@@ -1,6 +1,6 @@
 use actix_web::{middleware::Logger, web, App, HttpServer};
 
-use shared::db::connection::Pool;
+use api_db::connection::Pool;
 use shared::errors::{ServiceError, ServiceErrorType};
 
 mod routes;
@@ -9,9 +9,10 @@ mod routes;
 async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
 
-    let pg_connection: Pool = shared::db::connection::establish_connection(); // ne pas utiliser en appdate (enfin a vérifier)
+    let pg_connection: Pool = api_db::connection::establish_connection();
 
-    let users_repository = api_lib::repositories::users_repository::UsersRepository::new(pg_connection.clone());
+    let users_repository =
+        api_db::repositories::users_repository::UsersRepository::new(pg_connection.clone());
 
     let config = shared::config::Config::init();
 
@@ -35,4 +36,3 @@ async fn main() -> std::io::Result<()> {
     .run()
     .await
 }
-

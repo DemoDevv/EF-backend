@@ -1,13 +1,13 @@
 use diesel::query_dsl::methods::{FilterDsl, SelectDsl};
 use diesel::{ExpressionMethods, RunQueryDsl, SelectableHelper};
 
-use shared::db::connection::Pool;
-use shared::db::schema::users;
+use crate::connection::Pool;
+use crate::schema::users;
 use shared::errors::ServiceError;
-use shared::models::user::{InsertableUser, User};
+use crate::models::user::{InsertableUser, User};
 use shared::types::user::NewUser;
 
-use shared::db::repository::{Repository, RepositoryResult, UserRepository};
+use crate::repository::{Repository, RepositoryResult, UserRepository};
 
 #[derive(Clone)]
 pub struct UsersRepository {

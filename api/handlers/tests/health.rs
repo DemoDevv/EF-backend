@@ -1,5 +1,5 @@
 use actix_web::{http::StatusCode, web, App};
-use api_lib::handlers::health;
+use api_handlers::health;
 
 #[actix_web::test]
 async fn test_health_get() {

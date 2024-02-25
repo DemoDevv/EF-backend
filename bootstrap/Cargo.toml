@@ -1,5 +1,5 @@
 [package]
-name = "api-main"
+name = "api-bootstrap"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,5 +9,6 @@ edition = "2021"
 actix-web = "4.4.0"
 dotenv = "0.15.0"
 
-api-lib = { path = "../lib" }
-shared = { path = "../../shared" }
+api-handlers = { path = "../api/handlers" }
+api-db = { path = "../api/db" }
+shared = { path = "../shared" }
