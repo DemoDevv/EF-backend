@@ -1,23 +1,20 @@
 use actix_web::{middleware::Logger, web, App, HttpServer};
 
 use api_db::connection::Pool;
-use api_services::redis::RedisRepository;
 use shared::errors::{ServiceError, ServiceErrorType};
 
 mod routes;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenv::dotenv().ok();
+    let config = shared::config::Config::init();
 
-    let pg_connection: Pool = api_db::connection::establish_connection();
+    let pg_connection: Pool = api_db::connection::establish_connection(&config);
 
-    let redis_client = api_services::redis::get_redis_client();
+    let redis_client = api_services::redis::get_redis_client(&config);
 
     let users_repository =
         api_db::repositories::users_repository::UsersRepository::new(pg_connection.clone());
-
-    let config = shared::config::Config::init();
 
     println!("🚀 Démarrage du back-end.");
 

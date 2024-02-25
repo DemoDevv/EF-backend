@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4.4.0"
-dotenv = "0.15.0"
 
 api-handlers = { path = "../api/handlers" }
 api-services = { path = "../api/services" }

@@ -272,7 +272,6 @@ dependencies = [
  "api-db",
  "api-handlers",
  "api-services",
- "dotenv",
  "shared",
 ]
 
@@ -299,8 +298,8 @@ dependencies = [
  "async-trait",
  "chrono",
  "diesel",
- "dotenv",
  "futures-util",
+ "once_cell",
  "serde",
  "serde_json",
  "shared",
@@ -321,6 +320,7 @@ dependencies = [
  "diesel",
  "futures-util",
  "jsonwebtoken",
+ "once_cell",
  "r2d2",
  "redis",
  "serde",
@@ -1381,6 +1381,7 @@ dependencies = [
  "async-trait",
  "chrono",
  "diesel",
+ "dotenv",
  "futures-util",
  "jsonwebtoken",
  "r2d2",

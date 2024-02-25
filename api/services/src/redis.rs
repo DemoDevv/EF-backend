@@ -1,3 +1,5 @@
+use shared::config::Config;
+
 extern crate redis;
 
 // type initialization
@@ -5,8 +7,8 @@ type RedisServiceResult<T> = Result<T, redis::RedisError>; // todo: move to serv
 type RedisClient = redis::Client;
 
 // public function to get a redis client
-pub fn get_redis_client() -> RedisClient {
-    redis::Client::open("redis://mathieulebras@127.0.0.1:6379").unwrap()
+pub fn get_redis_client(config: &Config) -> RedisClient {
+    redis::Client::open(config.redis_info.get_url()).unwrap()
 }
 
 #[async_trait::async_trait]
@@ -45,32 +47,36 @@ impl RedisRepository for RedisClient {
 }
 
 mod tests {
+    #[allow(unused_imports)] // bug pas important avec l'éditeur
     use super::*;
+    use once_cell::sync::Lazy;
+
+    #[allow(dead_code)] // bug pas important avec l'éditeur
+    const CONFIG: Lazy<shared::config::Config> = Lazy::new(|| shared::config::Config::init());
+    #[allow(dead_code)] // bug pas important avec l'éditeur
+    const CLIENT: Lazy<RedisClient> = Lazy::new(|| get_redis_client(&CONFIG.clone()));
 
     #[actix_rt::test]
     async fn test_redis_ping() {
-        let client = get_redis_client();
-        let result = client.ping().await;
+        let result = CLIENT.ping().await;
         assert_eq!(result, Ok(Some("PONG".to_string())));
     }
 
     #[actix_rt::test]
     async fn test_redis_set_get() {
-        let client = get_redis_client();
         let key = "test";
         let value = "value";
-        client.set(key, value).await.unwrap();
-        let result = client.get(key).await.unwrap();
+        CLIENT.set(key, value).await.unwrap();
+        let result = CLIENT.get(key).await.unwrap();
         assert_eq!(result, Some(value.to_string()));
     }
 
     #[actix_rt::test]
     async fn test_redis_delete() {
-        let client = get_redis_client();
         let key = "test";
-        client.set(key, "value").await.unwrap();
-        client.delete(key).await.unwrap();
-        let result = client.get(key).await.unwrap();
+        CLIENT.set(key, "value").await.unwrap();
+        CLIENT.delete(key).await.unwrap();
+        let result = CLIENT.get(key).await.unwrap();
         assert_eq!(result, None);
     }
 }
