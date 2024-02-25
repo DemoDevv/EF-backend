@@ -270,6 +270,7 @@ dependencies = [
  "actix-web",
  "api-db",
  "api-handlers",
+ "api-services",
  "dotenv",
  "shared",
 ]
@@ -319,6 +320,7 @@ dependencies = [
  "futures-util",
  "jsonwebtoken",
  "r2d2",
+ "redis",
  "serde",
  "shared",
  "time",
@@ -496,7 +498,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "35ed6e9d84f0b51a7f52daf1c7d71dd136fd7a3f41a8462b8cdb8c78d920fad4"
 dependencies = [
  "bytes",
+ "futures-core",
  "memchr",
+ "pin-project-lite",
+ "tokio",
+ "tokio-util",
 ]
 
 [[package]]
@@ -702,6 +708,7 @@ checksum = "3d6401deb83407ab3da39eba7e33987a73c3df0c82b4bb5813ee871c19c41d48"
 dependencies = [
  "futures-core",
  "futures-macro",
+ "futures-sink",
  "futures-task",
  "pin-project-lite",
  "pin-utils",
@@ -1192,12 +1199,18 @@ version = "0.24.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c580d9cbbe1d1b479e8d67cf9daf6a62c957e6846048408b80b43ac3f6af84cd"
 dependencies = [
+ "async-trait",
+ "bytes",
  "combine",
+ "futures-util",
  "itoa",
  "percent-encoding",
+ "pin-project-lite",
  "ryu",
  "sha1_smol",
  "socket2 0.4.10",
+ "tokio",
+ "tokio-util",
  "url",
 ]
 
@@ -1369,7 +1382,6 @@ dependencies = [
  "futures-util",
  "jsonwebtoken",
  "r2d2",
- "redis",
  "serde",
  "time",
  "validator",

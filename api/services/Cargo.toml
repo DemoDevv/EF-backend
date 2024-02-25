@@ -22,3 +22,7 @@ validator = { version = "0.16", features = ["derive"] }
 shared = { path = "../../shared" }
 
 api-db = { path = "../db" }
+
+[dependencies.redis]
+version = "*"
+features = ["aio", "tokio-comp"]

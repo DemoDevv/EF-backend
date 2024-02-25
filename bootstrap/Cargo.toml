@@ -10,5 +10,6 @@ actix-web = "4.4.0"
 dotenv = "0.15.0"
 
 api-handlers = { path = "../api/handlers" }
+api-services = { path = "../api/services" }
 api-db = { path = "../api/db" }
 shared = { path = "../shared" }
