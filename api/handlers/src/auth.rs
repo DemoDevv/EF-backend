@@ -2,14 +2,14 @@ use actix_web::{web, Error, HttpResponse};
 use argon2::PasswordHash;
 use validator::Validate;
 
-use shared::auth::services::create_valid_token;
+use api_services::auth::services::create_valid_token;
 
-use shared::auth::errors::AuthentificationError;
+use api_services::auth::errors::AuthentificationError;
 use shared::config::Config;
-use shared::db::repository::UserRepository;
+use api_db::repository::UserRepository;
 use shared::errors::{ServiceError, ServiceErrorType};
 use shared::extractors::user_extractor::InputUser;
-use shared::helpers::{hash_password, verify_password};
+use api_services::auth::helpers::{hash_password, verify_password};
 use shared::types::roles::Role;
 use shared::types::user::NewUser;
 

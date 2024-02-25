@@ -5,8 +5,10 @@
 
 [workspace]
 members = [
-    "api/lib",
-    "api/main",
+    "api/db",
+    "api/handlers",
+    "api/services",
+    "bootstrap",
     "shared"
 ]
 resolver = "2"

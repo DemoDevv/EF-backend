@@ -264,11 +264,35 @@ dependencies = [
 ]
 
 [[package]]
-name = "api-lib"
+name = "api-bootstrap"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "api-db",
+ "api-handlers",
+ "dotenv",
+ "shared",
+]
+
+[[package]]
+name = "api-db"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "chrono",
+ "diesel",
+ "serde",
+ "shared",
+]
+
+[[package]]
+name = "api-handlers"
 version = "0.1.0"
 dependencies = [
  "actix-web",
  "actix-web-httpauth",
+ "api-db",
+ "api-services",
  "argon2",
  "async-trait",
  "chrono",
@@ -282,13 +306,23 @@ dependencies = [
 ]
 
 [[package]]
-name = "api-main"
+name = "api-services"
 version = "0.1.0"
 dependencies = [
  "actix-web",
- "api-lib",
- "dotenv",
+ "actix-web-httpauth",
+ "api-db",
+ "argon2",
+ "async-trait",
+ "chrono",
+ "diesel",
+ "futures-util",
+ "jsonwebtoken",
+ "r2d2",
+ "serde",
  "shared",
+ "time",
+ "validator",
 ]
 
 [[package]]
