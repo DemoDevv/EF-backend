@@ -7,15 +7,16 @@ use api_db::repository::Repository;
 use shared::types::user::NewUser;
 use shared::types::roles::Role;
 
+use once_cell::sync::Lazy;
+
+const CONFIG: Lazy<shared::config::Config> = Lazy::new(|| shared::config::Config::init());
+
 #[actix_web::test]
 async fn test_login_with_bad_credentials() {
-    dotenv::dotenv().ok(); // ne pas oublier de charger les variables d'environnement
-    let config = shared::config::Config::init();
-
-    let users_repository = UsersRepository::new(api_db::connection::establish_connection());
+    let users_repository = UsersRepository::new(api_db::connection::establish_connection(&CONFIG));
 
     let app = App::new()
-        .app_data(web::Data::new(config))
+        .app_data(web::Data::new(CONFIG.clone()))
         .app_data(web::Data::new(users_repository))
         .configure(auth::service::<UsersRepository>);
     let app = actix_web::test::init_service(app).await;
@@ -34,10 +35,7 @@ async fn test_login_with_bad_credentials() {
 
 #[actix_web::test]
 async fn test_login_with_good_credentials() {
-    dotenv::dotenv().ok(); // ne pas oublier de charger les variables d'environnement
-    let config = shared::config::Config::init();
-
-    let users_repository = UsersRepository::new(api_db::connection::establish_connection());
+    let users_repository = UsersRepository::new(api_db::connection::establish_connection(&CONFIG));
 
     let good_email = "goodemail@test.com";
     let good_password = "password";
@@ -55,7 +53,7 @@ async fn test_login_with_good_credentials() {
     .await.unwrap();
 
     let app = App::new()
-        .app_data(web::Data::new(config))
+        .app_data(web::Data::new(CONFIG.clone()))
         .app_data(web::Data::new(users_repository))
         .configure(auth::service::<UsersRepository>);
     let app = actix_web::test::init_service(app).await;
@@ -77,13 +75,10 @@ async fn test_login_with_good_credentials() {
 
 #[actix_web::test]
 async fn test_register_with_email_already_exist() {
-    dotenv::dotenv().ok(); // ne pas oublier de charger les variables d'environnement
-    let config = shared::config::Config::init();
-
-    let users_repository = UsersRepository::new(api_db::connection::establish_connection());
+    let users_repository = UsersRepository::new(api_db::connection::establish_connection(&CONFIG));
 
     let app = App::new()
-        .app_data(web::Data::new(config))
+        .app_data(web::Data::new(CONFIG.clone()))
         .app_data(web::Data::new(users_repository))
         .configure(auth::service::<UsersRepository>);
     let app = actix_web::test::init_service(app).await;
@@ -102,13 +97,10 @@ async fn test_register_with_email_already_exist() {
 
 #[actix_web::test]
 async fn test_register_with_email_not_already_exist() {
-    dotenv::dotenv().ok(); // ne pas oublier de charger les variables d'environnement
-    let config = shared::config::Config::init();
-
-    let users_repository = UsersRepository::new(api_db::connection::establish_connection());
+    let users_repository = UsersRepository::new(api_db::connection::establish_connection(&CONFIG));
 
     let app = App::new()
-        .app_data(web::Data::new(config))
+        .app_data(web::Data::new(CONFIG.clone()))
         .app_data(web::Data::new(users_repository))
         .configure(auth::service::<UsersRepository>);
     let app = actix_web::test::init_service(app).await;

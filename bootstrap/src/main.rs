@@ -7,14 +7,14 @@ mod routes;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenv::dotenv().ok();
+    let config = shared::config::Config::init();
 
-    let pg_connection: Pool = api_db::connection::establish_connection();
+    let pg_connection: Pool = api_db::connection::establish_connection(&config);
+
+    let redis_client = api_services::redis::get_redis_client(&config);
 
     let users_repository =
         api_db::repositories::users_repository::UsersRepository::new(pg_connection.clone());
-
-    let config = shared::config::Config::init();
 
     println!("🚀 Démarrage du back-end.");
 
@@ -29,6 +29,7 @@ async fn main() -> std::io::Result<()> {
             }))
             .app_data(web::Data::new(config.clone()))
             .app_data(web::Data::new(users_repository.clone()))
+            .app_data(web::Data::new(redis_client.clone()))
             .wrap(Logger::default())
             .configure(routes::config)
     })

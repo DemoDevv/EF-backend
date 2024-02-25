@@ -1,0 +1,82 @@
+use shared::config::Config;
+
+extern crate redis;
+
+// type initialization
+type RedisServiceResult<T> = Result<T, redis::RedisError>; // todo: move to serviceError
+type RedisClient = redis::Client;
+
+// public function to get a redis client
+pub fn get_redis_client(config: &Config) -> RedisClient {
+    redis::Client::open(config.redis_info.get_url()).unwrap()
+}
+
+#[async_trait::async_trait]
+pub trait RedisRepository: Clone + Send + Sync + 'static {
+    async fn ping(&self) -> RedisServiceResult<Option<String>>;
+    async fn get(&self, key: &str) -> RedisServiceResult<Option<String>>;
+    async fn set(&self, key: &str, value: &str) -> RedisServiceResult<()>;
+    async fn delete(&self, key: &str) -> RedisServiceResult<()>;
+}
+
+#[async_trait::async_trait]
+impl RedisRepository for RedisClient {
+    async fn ping(&self) -> RedisServiceResult<Option<String>> {
+        let mut con: redis::aio::Connection = self.get_async_connection().await?;
+        redis::cmd("PING").query_async(&mut con).await
+    }
+
+    async fn get(&self, key: &str) -> RedisServiceResult<Option<String>> {
+        let mut con: redis::aio::Connection = self.get_async_connection().await?;
+        redis::cmd("GET").arg(key).query_async(&mut con).await
+    }
+
+    async fn set(&self, key: &str, value: &str) -> RedisServiceResult<()> {
+        let mut con: redis::aio::Connection = self.get_async_connection().await?;
+        redis::cmd("SET")
+            .arg(key)
+            .arg(value)
+            .query_async(&mut con)
+            .await
+    }
+
+    async fn delete(&self, key: &str) -> RedisServiceResult<()> {
+        let mut con: redis::aio::Connection = self.get_async_connection().await?;
+        redis::cmd("DEL").arg(key).query_async(&mut con).await
+    }
+}
+
+mod tests {
+    #[allow(unused_imports)] // bug pas important avec l'éditeur
+    use super::*;
+    use once_cell::sync::Lazy;
+
+    #[allow(dead_code)] // bug pas important avec l'éditeur
+    const CONFIG: Lazy<shared::config::Config> = Lazy::new(|| shared::config::Config::init());
+    #[allow(dead_code)] // bug pas important avec l'éditeur
+    const CLIENT: Lazy<RedisClient> = Lazy::new(|| get_redis_client(&CONFIG.clone()));
+
+    #[actix_rt::test]
+    async fn test_redis_ping() {
+        let result = CLIENT.ping().await;
+        assert_eq!(result, Ok(Some("PONG".to_string())));
+    }
+
+    #[actix_rt::test]
+    async fn test_redis_set_get() {
+        let key = "test";
+        let value = "value";
+        CLIENT.set(key, value).await.unwrap();
+        let result = CLIENT.get(key).await.unwrap();
+        assert_eq!(result, Some(value.to_string()));
+    }
+
+    #[actix_rt::test]
+    async fn test_redis_delete() {
+        let key = "test";
+        CLIENT.set(key, "value").await.unwrap();
+        CLIENT.delete(key).await.unwrap();
+        let result = CLIENT.get(key).await.unwrap();
+        assert_eq!(result, None);
+    }
+}

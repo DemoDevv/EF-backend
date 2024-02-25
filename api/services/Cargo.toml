@@ -18,7 +18,13 @@ jsonwebtoken = "9.2.0"
 argon2 = "0.5.3"
 actix-web-httpauth = "0.8.1"
 validator = { version = "0.16", features = ["derive"] }
+once_cell = "1.19.0"
 
 shared = { path = "../../shared" }
 
 api-db = { path = "../db" }
+actix-rt = "2.9.0"
+
+[dependencies.redis]
+version = "*"
+features = ["aio", "tokio-comp"]
