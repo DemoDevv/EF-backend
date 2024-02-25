@@ -43,3 +43,34 @@ impl RedisRepository for RedisClient {
         redis::cmd("DEL").arg(key).query_async(&mut con).await
     }
 }
+
+mod tests {
+    use super::*;
+
+    #[actix_rt::test]
+    async fn test_redis_ping() {
+        let client = get_redis_client();
+        let result = client.ping().await;
+        assert_eq!(result, Ok(Some("PONG".to_string())));
+    }
+
+    #[actix_rt::test]
+    async fn test_redis_set_get() {
+        let client = get_redis_client();
+        let key = "test";
+        let value = "value";
+        client.set(key, value).await.unwrap();
+        let result = client.get(key).await.unwrap();
+        assert_eq!(result, Some(value.to_string()));
+    }
+
+    #[actix_rt::test]
+    async fn test_redis_delete() {
+        let client = get_redis_client();
+        let key = "test";
+        client.set(key, "value").await.unwrap();
+        client.delete(key).await.unwrap();
+        let result = client.get(key).await.unwrap();
+        assert_eq!(result, None);
+    }
+}
