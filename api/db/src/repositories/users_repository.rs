@@ -4,9 +4,9 @@
 use diesel::prelude::*;
 
 use crate::connection::Pool;
+use crate::models::user::{InsertableUser, User};
 use crate::schema::users;
 use shared::errors::ServiceError;
-use crate::models::user::{InsertableUser, User};
 use shared::types::user::NewUser;
 
 use crate::repository::{Repository, RepositoryResult, UserRepository};
@@ -78,8 +78,16 @@ impl Repository<User, NewUser> for UsersRepository {
         todo!("update user by id")
     }
 
-    async fn delete(&self, _id: i32) -> RepositoryResult<i32> {
-        todo!("delete user by id")
+    async fn delete(&self, _id: i32) -> RepositoryResult<usize> {
+        diesel::delete(users::table.filter(users::id.eq(_id)))
+            .execute(&mut self.conn.get().map_err(|_| ServiceError {
+                message: Some("Error for getting connection to the database".to_string()),
+                error_type: shared::errors::ServiceErrorType::DatabaseError,
+            })?)
+            .map_err(|_| ServiceError {
+                message: Some("Error deleting user".to_string()),
+                error_type: shared::errors::ServiceErrorType::InternalServerError,
+            })
     }
 }
 
@@ -95,6 +103,18 @@ impl UserRepository for UsersRepository {
             })?)
             .map_err(|_| ServiceError {
                 message: Some("Error getting user".to_string()),
+                error_type: shared::errors::ServiceErrorType::InternalServerError,
+            })
+    }
+
+    async fn delete_user_by_email(&self, email: &str) -> RepositoryResult<usize> {
+        diesel::delete(users::table.filter(users::email.eq(email)))
+            .execute(&mut self.conn.get().map_err(|_| ServiceError {
+                message: Some("Error for getting connection to the database".to_string()),
+                error_type: shared::errors::ServiceErrorType::DatabaseError,
+            })?)
+            .map_err(|_| ServiceError {
+                message: Some("Error deleting user".to_string()),
                 error_type: shared::errors::ServiceErrorType::InternalServerError,
             })
     }
