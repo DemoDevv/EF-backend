@@ -64,7 +64,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_redis_set_get() {
-        let key = "test";
+        let key = "test_set";
         let value = "value";
         CLIENT.set(key, value).await.unwrap();
         let result = CLIENT.get(key).await.unwrap();
@@ -73,7 +73,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_redis_delete() {
-        let key = "test";
+        let key = "test_delete";
         CLIENT.set(key, "value").await.unwrap();
         CLIENT.delete(key).await.unwrap();
         let result = CLIENT.get(key).await.unwrap();

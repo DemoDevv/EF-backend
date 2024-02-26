@@ -3,7 +3,7 @@ use serde::Serialize;
 
 use crate::schema::users;
 
-#[derive(Queryable, Selectable, Serialize)]
+#[derive(Queryable, Selectable, Serialize, AsChangeset, Identifiable, Clone)]
 #[diesel(table_name = users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct User {
