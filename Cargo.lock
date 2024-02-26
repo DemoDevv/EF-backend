@@ -295,6 +295,7 @@ dependencies = [
  "actix-web",
  "actix-web-httpauth",
  "api-db",
+ "api-middlewares",
  "api-services",
  "argon2",
  "async-trait",
@@ -306,6 +307,15 @@ dependencies = [
  "serde_json",
  "shared",
  "validator",
+]
+
+[[package]]
+name = "api-middlewares"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "futures-util",
+ "shared",
 ]
 
 [[package]]

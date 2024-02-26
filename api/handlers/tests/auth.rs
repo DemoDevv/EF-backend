@@ -1,12 +1,12 @@
 use actix_web::{http::StatusCode, web, App};
 
 use api_db::models::user::User;
-use api_handlers::auth;
 use api_db::repositories::users_repository::UsersRepository;
+use api_handlers::auth;
 
 use api_db::repository::{Repository, UserRepository};
-use shared::types::user::NewUser;
 use shared::types::roles::Role;
+use shared::types::user::NewUser;
 
 use once_cell::sync::Lazy;
 
@@ -20,15 +20,17 @@ async fn generate_good_user(users_repository: &UsersRepository) -> User {
     let hash = api_services::auth::helpers::hash_password(good_password).unwrap();
 
     // Create a valid user
-    users_repository.create(&NewUser {
-        first_name: "Jhon".to_string(),
-        last_name: "Doe".to_string(),
-        email: good_email.to_string(),
-        created_at: chrono::Local::now().naive_local(),
-        password: hash,
-        role: Role::User.to_string(),
-    })
-    .await.unwrap()
+    users_repository
+        .create(&NewUser {
+            first_name: "Jhon".to_string(),
+            last_name: "Doe".to_string(),
+            email: good_email.to_string(),
+            created_at: chrono::Local::now().naive_local(),
+            password: hash,
+            role: Role::User.to_string(),
+        })
+        .await
+        .unwrap()
 }
 
 #[actix_web::test]
@@ -124,7 +126,10 @@ async fn test_register_with_email_not_already_exist() {
         .to_request();
     let resp = actix_web::test::call_service(&app, req).await;
 
-    users_repository.delete_user_by_email(GOOD_EMAIL).await.unwrap();
+    users_repository
+        .delete_user_by_email(GOOD_EMAIL)
+        .await
+        .unwrap();
 
     assert_eq!(resp.status(), StatusCode::OK);
 }

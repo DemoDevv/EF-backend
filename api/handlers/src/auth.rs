@@ -4,12 +4,12 @@ use validator::Validate;
 
 use api_services::auth::services::create_valid_token;
 
-use api_services::auth::errors::AuthentificationError;
-use shared::config::Config;
 use api_db::repository::UserRepository;
+use api_services::auth::errors::AuthentificationError;
+use api_services::auth::helpers::{hash_password, verify_password};
+use shared::config::Config;
 use shared::errors::{ServiceError, ServiceErrorType};
 use shared::extractors::user_extractor::InputUser;
-use api_services::auth::helpers::{hash_password, verify_password};
 use shared::types::roles::Role;
 use shared::types::user::NewUser;
 
@@ -26,15 +26,11 @@ pub async fn login<R: UserRepository>(
     repo: web::Data<R>,
     user_json: web::Json<InputUser>,
 ) -> Result<HttpResponse, Error> {
-
     // we make the validation of the user entry
-    user_json.validate().map_err(|err| {
-            ServiceError {
-                message: Some(format!("Invalid user: {}", err)),
-                error_type: ServiceErrorType::BadDeserialization,
-            }
-        }
-    )?;
+    user_json.validate().map_err(|err| ServiceError {
+        message: Some(format!("Invalid user: {}", err)),
+        error_type: ServiceErrorType::BadDeserialization,
+    })?;
 
     let generique_error = ServiceError {
         message: Some("Authentification failed".to_string()),
@@ -44,10 +40,13 @@ pub async fn login<R: UserRepository>(
     let user = match repo.get_user_by_email(&user_json.email).await {
         Ok(user_from_the_db) => {
             // we parse the hash from the database
-            let parsed_hash = PasswordHash::new(&user_from_the_db.password).map_err(|err| AuthentificationError::from(err)).map_err(|err| ServiceError::from(err))?;
+            let parsed_hash = PasswordHash::new(&user_from_the_db.password)
+                .map_err(|err| AuthentificationError::from(err))
+                .map_err(|err| ServiceError::from(err))?;
 
             // we verify the hash with the hash from the user
-            verify_password(&user_json.password, &parsed_hash).map_err(|err| ServiceError::from(err))?;
+            verify_password(&user_json.password, &parsed_hash)
+                .map_err(|err| ServiceError::from(err))?;
 
             // we don't have error so we return the user
             Ok(user_from_the_db)
@@ -65,15 +64,11 @@ pub async fn register<R: UserRepository>(
     repo: web::Data<R>,
     user_json: web::Json<InputUser>,
 ) -> Result<HttpResponse, Error> {
-
     // we make the validation of the user entry
-    user_json.validate().map_err(|err| {
-        ServiceError {
-            message: Some(format!("Invalid user: {}", err)),
-            error_type: ServiceErrorType::BadDeserialization,
-        }
-    }
-)?;
+    user_json.validate().map_err(|err| ServiceError {
+        message: Some(format!("Invalid user: {}", err)),
+        error_type: ServiceErrorType::BadDeserialization,
+    })?;
 
     let user = match repo.get_user_by_email(&user_json.email).await {
         Ok(_) => Err(ServiceError {
@@ -89,7 +84,8 @@ pub async fn register<R: UserRepository>(
                 }),
                 _ => {
                     // password hashing
-                    let hash = hash_password(&user_json.password).map_err(|err| ServiceError::from(err))?;
+                    let hash = hash_password(&user_json.password)
+                        .map_err(|err| ServiceError::from(err))?;
 
                     repo.create(&NewUser {
                         first_name: "Jhon".to_string(),
