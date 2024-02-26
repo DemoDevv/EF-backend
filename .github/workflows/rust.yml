@@ -6,7 +6,20 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  DEVELOPMENT: true
+
+  VERSION: 0.0.3
+  
   DATABASE_URL: postgres://mathieulebras@localhost:5432/echofetch
+  
+  REDIS_URL: redis://mathieulebras@127.0.0.1:6379
+  REDIS_USERNAME: mathieulebras
+  REDIS_PASSWORD: ""
+  REDIS_PORT: 6379
+  REDIS_HOST: 127.0.0.1
+  
+  JWT_SECRET: test
+  JWT_EXPIRED_IN: 5
 
 jobs:
   build:
