@@ -279,9 +279,11 @@ dependencies = [
 name = "api-db"
 version = "0.1.0"
 dependencies = [
+ "actix-rt",
  "async-trait",
  "chrono",
  "diesel",
+ "once_cell",
  "serde",
  "shared",
 ]
