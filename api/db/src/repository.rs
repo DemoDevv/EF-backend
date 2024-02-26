@@ -1,5 +1,5 @@
-use shared::{errors, types::user::NewUser};
 use crate::models::user::User;
+use shared::{errors, types::user::NewUser};
 
 pub type RepositoryResult<T> = Result<T, errors::ServiceError>;
 

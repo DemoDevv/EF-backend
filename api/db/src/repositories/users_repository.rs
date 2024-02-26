@@ -139,7 +139,8 @@ mod tests {
     #[allow(dead_code)] // bug pas important avec l'éditeur
     const CONFIG: Lazy<shared::config::Config> = Lazy::new(|| shared::config::Config::init());
     #[allow(dead_code)] // bug pas important avec l'éditeur
-    const USER_REPOSITORY: Lazy<UsersRepository> = Lazy::new(|| UsersRepository::new(crate::connection::establish_connection(&CONFIG)));
+    const USER_REPOSITORY: Lazy<UsersRepository> =
+        Lazy::new(|| UsersRepository::new(crate::connection::establish_connection(&CONFIG)));
 
     #[allow(dead_code)] // bug pas important avec l'éditeur
     const GOOD_EMAIL: &str = "goodemail@test.com";
@@ -148,15 +149,17 @@ mod tests {
 
     #[allow(dead_code)] // bug pas important avec l'éditeur
     async fn generate_good_user(users_repository: &UsersRepository) -> User {
-        users_repository.create(&NewUser {
-            first_name: "Jhon".to_string(),
-            last_name: "Doe".to_string(),
-            email: GOOD_EMAIL.to_string(),
-            created_at: chrono::Local::now().naive_local(),
-            password: GOOD_PASSWORD.to_string(),
-            role: shared::types::roles::Role::User.to_string(),
-        })
-        .await.unwrap()
+        users_repository
+            .create(&NewUser {
+                first_name: "Jhon".to_string(),
+                last_name: "Doe".to_string(),
+                email: GOOD_EMAIL.to_string(),
+                created_at: chrono::Local::now().naive_local(),
+                password: GOOD_PASSWORD.to_string(),
+                role: shared::types::roles::Role::User.to_string(),
+            })
+            .await
+            .unwrap()
     }
 
     #[actix_rt::test]
