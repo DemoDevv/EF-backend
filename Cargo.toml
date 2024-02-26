@@ -6,7 +6,8 @@
 [workspace]
 members = [
     "api/db",
-    "api/handlers",
+    "api/handlers", 
+    "api/middlewares",
     "api/services",
     "bootstrap",
     "shared"
