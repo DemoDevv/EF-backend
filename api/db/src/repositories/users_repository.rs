@@ -1,6 +1,3 @@
-// use diesel::query_dsl::methods::{FilterDsl, SelectDsl};
-// use diesel::{ExpressionMethods, RunQueryDsl, SelectableHelper};
-
 use diesel::prelude::*;
 
 use crate::connection::Pool;
