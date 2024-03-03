@@ -25,23 +25,13 @@ Le projet est organisé en plusieurs modules principaux :
 
 ## Améliorations futures
 
-- **Hashage des mots de passe** : Actuellement, les mots de passe sont stockés en clair dans la base de données, ce qui n'est pas sécurisé. Une amélioration importante serait de hasher les mots de passe avant de les stocker.
-
-- **Gestion des rôles** : Actuellement, tous les utilisateurs ont le même rôle. Vous pourriez ajouter une gestion des rôles plus fine, avec différents niveaux d'accès pour les utilisateurs, les administrateurs, etc.
-
 - **Pagination** : Si votre application doit gérer un grand nombre d'utilisateurs, vous pourriez envisager d'ajouter une pagination aux endpoints qui renvoient plusieurs utilisateurs.
-
-- **Validation des données** : Vous pourriez ajouter une validation plus stricte des données entrantes, par exemple pour vérifier que les adresses e-mail sont valides.
 
 - **Tests plus complets** : Bien que votre application ait des tests, vous pourriez envisager d'ajouter des tests plus complets, y compris des tests d'intégration et des tests de bout en bout.
 
 - **Journalisation** : Pour faciliter le débogage, vous pourriez ajouter une journalisation plus détaillée de ce qui se passe lors de l'exécution de votre application.
 
 - **Documentation de l'API** : Pour faciliter l'utilisation de votre API par d'autres développeurs (ou par vous-même à l'avenir), vous pourriez documenter vos endpoints d'API, par exemple en utilisant Swagger.
-
-- **Amélioration de la gestion des erreurs** : Vous pourriez améliorer la gestion des erreurs en fournissant des messages d'erreur plus détaillés et en gérant plus de cas d'erreur potentiels.
-
-- **Ajout d'une mise en cache Redis** : Le backend fournira une mise en cache efficace pour des gestions de session ou autres.
 
 ## Comment exécuter le projet
 
