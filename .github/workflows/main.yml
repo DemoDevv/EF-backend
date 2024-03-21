@@ -45,8 +45,18 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Cache cargo dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.cargo
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+
     - name: Install diesel_cli
       run: cargo install diesel_cli --no-default-features --features "postgres"
+      env:
+        CARGO_INSTALL_ROOT: /github/home/.cargo
 
     - name: Run database migrations
       run: diesel migration run
