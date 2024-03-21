@@ -131,7 +131,7 @@ async fn test_register_with_email_not_already_exist() {
         .await
         .unwrap();
 
-    println!("{:?}", resp);
+    println!("{:?}", resp.response());
 
     assert_eq!(resp.status(), StatusCode::OK);
 }
