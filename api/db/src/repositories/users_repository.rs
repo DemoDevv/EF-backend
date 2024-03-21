@@ -159,18 +159,18 @@ mod tests {
             .unwrap()
     }
 
-    // #[actix_rt::test]
-    // async fn test_update_user() {
-    //     let user = generate_good_user(&USER_REPOSITORY).await;
+    #[actix_rt::test]
+    async fn test_update_user() {
+        let user = generate_good_user(&USER_REPOSITORY).await;
 
-    //     let mut cloned_user = user.clone();
-    //     cloned_user.first_name = "Jane".to_string();
+        let mut cloned_user = user.clone();
+        cloned_user.first_name = "Jane".to_string();
 
-    //     let updated_user = USER_REPOSITORY.update(user.id, &cloned_user).await;
-    //     assert_eq!(updated_user.is_ok(), true);
+        let updated_user = USER_REPOSITORY.update(user.id, &cloned_user).await;
+        assert_eq!(updated_user.is_ok(), true);
 
-    //     USER_REPOSITORY.delete(user.id).await.unwrap();
+        USER_REPOSITORY.delete(user.id).await.unwrap();
 
-    //     assert_eq!(updated_user.unwrap().first_name, "Jane".to_string());
-    // }
+        assert_eq!(updated_user.unwrap().first_name, "Jane".to_string());
+    }
 }
