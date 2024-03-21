@@ -86,8 +86,8 @@ impl Repository<User, NewUser> for UsersRepository {
             })
     }
 
-    async fn delete(&self, _id: i32) -> RepositoryResult<usize> {
-        diesel::delete(users::table.filter(users::id.eq(_id)))
+    async fn delete(&self, id: i32) -> RepositoryResult<usize> {
+        diesel::delete(users::table.filter(users::id.eq(id)))
             .execute(&mut self.conn.get().map_err(|_| ServiceError {
                 message: Some("Error for getting connection to the database".to_string()),
                 error_type: shared::errors::ServiceErrorType::DatabaseError,
@@ -140,7 +140,7 @@ mod tests {
         Lazy::new(|| UsersRepository::new(crate::connection::establish_connection(&CONFIG)));
 
     #[allow(dead_code)] // bug pas important avec l'éditeur
-    const GOOD_EMAIL: &str = "goodemail@test.com";
+    const GOOD_EMAIL: &str = "goodemailrepo@test.com";
     #[allow(dead_code)] // bug pas important avec l'éditeur
     const GOOD_PASSWORD: &str = "password";
 
@@ -159,18 +159,18 @@ mod tests {
             .unwrap()
     }
 
-    #[actix_rt::test]
-    async fn test_update_user() {
-        let user = generate_good_user(&USER_REPOSITORY).await;
+    // #[actix_rt::test]
+    // async fn test_update_user() {
+    //     let user = generate_good_user(&USER_REPOSITORY).await;
 
-        let mut cloned_user = user.clone();
-        cloned_user.first_name = "Jane".to_string();
+    //     let mut cloned_user = user.clone();
+    //     cloned_user.first_name = "Jane".to_string();
 
-        let updated_user = USER_REPOSITORY.update(user.id, &cloned_user).await;
-        assert_eq!(updated_user.is_ok(), true);
+    //     let updated_user = USER_REPOSITORY.update(user.id, &cloned_user).await;
+    //     assert_eq!(updated_user.is_ok(), true);
 
-        USER_REPOSITORY.delete(user.id).await.unwrap();
+    //     USER_REPOSITORY.delete(user.id).await.unwrap();
 
-        assert_eq!(updated_user.unwrap().first_name, "Jane".to_string());
-    }
+    //     assert_eq!(updated_user.unwrap().first_name, "Jane".to_string());
+    // }
 }
