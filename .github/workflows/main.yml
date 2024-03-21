@@ -1,4 +1,4 @@
-name: Rust CI
+name: EF-Backend tests
 
 on:
   push:
