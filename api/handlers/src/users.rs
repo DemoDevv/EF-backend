@@ -8,7 +8,7 @@ pub fn service(cfg: &mut web::ServiceConfig) {
         web::scope("/v1/users")
             .wrap(HttpAuthentication::bearer(validator))
             .service(
-                web::resource("/")
+                web::resource("")
                     .route(web::get().to(index))
                     .route(web::post().to(store)),
             )
