@@ -17,7 +17,8 @@ pub fn service<R: UserRepository>(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/v1/auth")
             .service(web::resource("/login").route(web::post().to(login::<R>)))
-            .service(web::resource("/register").route(web::post().to(register::<R>))),
+            .service(web::resource("/register").route(web::post().to(register::<R>)))
+            .service(web::resource("/refresh_token").route(web::post().to(refresh_token))),
     );
 }
 
@@ -104,4 +105,8 @@ pub async fn register<R: UserRepository>(
     let token = create_valid_token(config, &user)?;
 
     Ok(HttpResponse::Ok().json(token))
+}
+
+pub async fn refresh_token() -> Result<HttpResponse, Error> {
+    Ok(HttpResponse::Ok().json("refresh_token"))
 }
