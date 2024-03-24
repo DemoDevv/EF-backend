@@ -36,16 +36,28 @@ pub async fn store<R: UserRepository>() -> Result<HttpResponse, Error> {
 }
 
 /// This function is used to show a user from the database
-pub async fn show<R: UserRepository>() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().json("One user"))
+pub async fn show<R: UserRepository>(
+    repository: web::Data<R>,
+    id: web::Path<i32>,
+) -> Result<HttpResponse, Error> {
+    Ok(repository
+        .get(id.into_inner())
+        .await
+        .map(|user| HttpResponse::Ok().json(user))?)
 }
 
 /// This function is used to update a user from the database
-pub async fn update<R: UserRepository>() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().json("user updated"))
+pub async fn update<R: UserRepository>(repository: web::Data<R>, id: web::Path<i32>) -> Result<HttpResponse, Error> {
+    Ok(HttpResponse::Ok().json("Update action perfomed on the user"))
 }
 
 /// This function is used to delete a user from the database
-pub async fn destroy<R: UserRepository>() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().json("user removed"))
+pub async fn destroy<R: UserRepository>(
+    repository: web::Data<R>,
+    id: web::Path<i32>,
+) -> Result<HttpResponse, Error> {
+    Ok(repository
+        .delete(id.into_inner())
+        .await
+        .map(|_| HttpResponse::Ok().json("Delete action perfomed on the user"))?)
 }
