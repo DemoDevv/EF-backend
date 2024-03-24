@@ -22,25 +22,30 @@ pub fn service<R: UserRepository>(cfg: &mut web::ServiceConfig) {
     );
 }
 
-pub async fn index<R: UserRepository>(repo: web::Data<R>) -> Result<HttpResponse, Error> {
-    Ok(repo
+/// This function is used to get all entities from the database
+pub async fn index<R: UserRepository>(repository: web::Data<R>) -> Result<HttpResponse, Error> {
+    Ok(repository
         .get_all()
         .await
         .map(|users| HttpResponse::Ok().json(users))?)
 }
 
+/// This function is used to store a new user in the database with the data received from the form
 pub async fn store<R: UserRepository>() -> Result<HttpResponse, Error> {
     Ok(HttpResponse::Ok().json("gestion des données reçus par le formulaire"))
 }
 
+/// This function is used to show a user from the database
 pub async fn show<R: UserRepository>() -> Result<HttpResponse, Error> {
     Ok(HttpResponse::Ok().json("One user"))
 }
 
+/// This function is used to update a user from the database
 pub async fn update<R: UserRepository>() -> Result<HttpResponse, Error> {
     Ok(HttpResponse::Ok().json("user updated"))
 }
 
+/// This function is used to delete a user from the database
 pub async fn destroy<R: UserRepository>() -> Result<HttpResponse, Error> {
     Ok(HttpResponse::Ok().json("user removed"))
 }
