@@ -70,6 +70,7 @@ pub async fn register<R: UserRepository>(
         error_type: ServiceErrorType::BadDeserialization,
     })?;
 
+    // FIXME: timing attack possible
     let user = match repo.get_user_by_email(&user_json.email).await {
         Ok(_) => Err(ServiceError {
             message: Some("User already exist".to_string()), // the message has to be more generic
