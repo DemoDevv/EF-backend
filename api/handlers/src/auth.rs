@@ -1,8 +1,9 @@
 use actix_web::{web, Error, HttpResponse};
+use api_services::auth::types::Tokens;
 use argon2::PasswordHash;
 use validator::Validate;
 
-use api_services::auth::services::create_valid_token;
+use api_services::auth::services::{create_valid_token, generate_refresh_token};
 
 use api_db::repository::UserRepository;
 use api_services::auth::errors::AuthentificationError;
@@ -55,8 +56,14 @@ pub async fn login<R: UserRepository>(
     }?;
 
     let token = create_valid_token(config, &user)?;
+    let refresh_token = generate_refresh_token();
 
-    Ok(HttpResponse::Ok().json(token))
+    let tokens = Tokens {
+        access_token: token,
+        refresh_token,
+    };
+
+    Ok(HttpResponse::Ok().json(tokens))
 }
 
 pub async fn register<R: UserRepository>(
@@ -103,6 +110,12 @@ pub async fn register<R: UserRepository>(
     }?;
 
     let token = create_valid_token(config, &user)?;
+    let refresh_token = generate_refresh_token();
 
-    Ok(HttpResponse::Ok().json(token))
+    let tokens = Tokens {
+        access_token: token,
+        refresh_token,
+    };
+
+    Ok(HttpResponse::Ok().json(tokens))
 }

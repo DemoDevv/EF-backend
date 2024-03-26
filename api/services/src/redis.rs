@@ -59,10 +59,11 @@ impl RedisRepository for RedisClient {
 
     async fn update_ttl(&self, key: &str, value: &str, ttl: i32) -> RedisServiceResult<()> {
         let mut con: redis::aio::Connection = self.get_async_connection().await?;
-        redis::cmd("SETEX")
+        redis::cmd("SET")
             .arg(key)
-            .arg(ttl)
             .arg(value)
+            .arg("EX")
+            .arg(ttl)
             .query_async(&mut con)
             .await
     }
