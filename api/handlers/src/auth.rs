@@ -63,6 +63,8 @@ pub async fn login<R: UserRepository>(
         refresh_token,
     };
 
+    // TODO: set dans redis key/value avec la key = refresh_token et value = user.id
+
     Ok(HttpResponse::Ok().json(tokens))
 }
 
@@ -118,4 +120,9 @@ pub async fn register<R: UserRepository>(
     };
 
     Ok(HttpResponse::Ok().json(tokens))
+}
+
+pub fn refresh_access_token() -> Result<HttpResponse, Error> {
+    // créer un nouveau access token et un refresh token puis modifier le refresh token dans redis
+    Ok(HttpResponse::Ok().finish())
 }
