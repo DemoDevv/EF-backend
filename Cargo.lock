@@ -334,6 +334,7 @@ dependencies = [
  "jsonwebtoken",
  "once_cell",
  "r2d2",
+ "rand",
  "redis",
  "serde",
  "shared",
