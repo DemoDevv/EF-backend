@@ -18,7 +18,8 @@ pub fn service<R: UserRepository>(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/v1/auth")
             .service(web::resource("/login").route(web::post().to(login::<R>)))
-            .service(web::resource("/register").route(web::post().to(register::<R>))),
+            .service(web::resource("/register").route(web::post().to(register::<R>)))
+            .service(web::resource("/refresh").route(web::post().to(refresh_tokens))),
     );
 }
 
@@ -122,7 +123,7 @@ pub async fn register<R: UserRepository>(
     Ok(HttpResponse::Ok().json(tokens))
 }
 
-pub fn refresh_access_token() -> Result<HttpResponse, Error> {
+pub async fn refresh_tokens() -> Result<HttpResponse, Error> {
     // créer un nouveau access token et un refresh token puis modifier le refresh token dans redis
     Ok(HttpResponse::Ok().finish())
 }
