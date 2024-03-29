@@ -8,6 +8,7 @@ use api_services::auth::services::{create_valid_token, generate_refresh_token};
 use api_db::repository::UserRepository;
 use api_services::auth::errors::AuthentificationError;
 use api_services::auth::helpers::{hash_password, verify_password};
+use api_services::redis::{RedisClient, RedisRepository};
 use shared::config::Config;
 use shared::errors::{ServiceError, ServiceErrorType};
 use shared::extractors::user_extractor::InputUser;
@@ -26,6 +27,7 @@ pub fn service<R: UserRepository>(cfg: &mut web::ServiceConfig) {
 pub async fn login<R: UserRepository>(
     config: web::Data<Config>,
     repo: web::Data<R>,
+    redis_client: web::Data<RedisClient>,
     user_json: web::Json<InputUser>,
 ) -> Result<HttpResponse, Error> {
     // we make the validation of the user entry
@@ -56,15 +58,13 @@ pub async fn login<R: UserRepository>(
         Err(_) => Err(generique_error),
     }?;
 
-    let token = create_valid_token(config, &user)?;
-    let refresh_token = generate_refresh_token();
-
     let tokens = Tokens {
-        access_token: token,
-        refresh_token,
+        access_token: create_valid_token(config, &user)?,
+        refresh_token: generate_refresh_token(),
     };
 
     // TODO: set dans redis key/value avec la key = refresh_token et value = user.id
+    redis_client.update_ttl(&tokens.refresh_token, &user.id.to_string(), 10).await.map_err(|err| ServiceError::from(err))?;
 
     Ok(HttpResponse::Ok().json(tokens))
 }
@@ -72,6 +72,7 @@ pub async fn login<R: UserRepository>(
 pub async fn register<R: UserRepository>(
     config: web::Data<Config>,
     repo: web::Data<R>,
+    redis_client: web::Data<RedisClient>,
     user_json: web::Json<InputUser>,
 ) -> Result<HttpResponse, Error> {
     // we make the validation of the user entry
@@ -112,13 +113,12 @@ pub async fn register<R: UserRepository>(
         }
     }?;
 
-    let token = create_valid_token(config, &user)?;
-    let refresh_token = generate_refresh_token();
-
     let tokens = Tokens {
-        access_token: token,
-        refresh_token,
+        access_token: create_valid_token(config, &user)?,
+        refresh_token: generate_refresh_token(),
     };
+
+    redis_client.update_ttl(&tokens.refresh_token, &user.id.to_string(), 10).await.map_err(|err| ServiceError::from(err))?;
 
     Ok(HttpResponse::Ok().json(tokens))
 }

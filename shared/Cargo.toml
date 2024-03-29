@@ -19,3 +19,7 @@ argon2 = "0.5.3"
 actix-web-httpauth = "0.8.1"
 validator = { version = "0.16", features = ["derive"] }
 dotenv = "0.15.0"
+
+[dependencies.redis]
+version = "*"
+features = ["aio", "tokio-comp"]

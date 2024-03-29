@@ -32,10 +32,12 @@ async fn generate_good_user(users_repository: &UsersRepository, email: &str, pas
 #[actix_web::test]
 async fn test_login_with_bad_credentials() {
     let users_repository = UsersRepository::new(api_db::connection::establish_connection(&CONFIG));
+    let redis_client = api_services::redis::get_redis_client(&CONFIG);
 
     let app = App::new()
         .app_data(web::Data::new(CONFIG.clone()))
         .app_data(web::Data::new(users_repository.clone()))
+        .app_data(web::Data::new(redis_client.clone()))
         .configure(auth::service::<UsersRepository>);
     let app = actix_web::test::init_service(app).await;
 
@@ -54,6 +56,7 @@ async fn test_login_with_bad_credentials() {
 #[actix_web::test]
 async fn test_login_with_good_credentials() {
     let users_repository = UsersRepository::new(api_db::connection::establish_connection(&CONFIG));
+    let redis_client = api_services::redis::get_redis_client(&CONFIG);
 
     let email = "mathieulebras@gmail.com";
     let password = "good_password";
@@ -62,6 +65,7 @@ async fn test_login_with_good_credentials() {
     let app = App::new()
         .app_data(web::Data::new(CONFIG.clone()))
         .app_data(web::Data::new(users_repository.clone()))
+        .app_data(web::Data::new(redis_client.clone()))
         .configure(auth::service::<UsersRepository>);
     let app = actix_web::test::init_service(app).await;
 
@@ -82,6 +86,7 @@ async fn test_login_with_good_credentials() {
 #[actix_web::test]
 async fn test_register_with_email_already_exist() {
     let users_repository = UsersRepository::new(api_db::connection::establish_connection(&CONFIG));
+    let redis_client = api_services::redis::get_redis_client(&CONFIG);
 
     let email = "mathieulebras_exist@gmail.com";
     let password = "good_password";
@@ -90,6 +95,7 @@ async fn test_register_with_email_already_exist() {
     let app = App::new()
         .app_data(web::Data::new(CONFIG.clone()))
         .app_data(web::Data::new(users_repository.clone()))
+        .app_data(web::Data::new(redis_client.clone()))
         .configure(auth::service::<UsersRepository>);
     let app = actix_web::test::init_service(app).await;
 
@@ -110,12 +116,14 @@ async fn test_register_with_email_already_exist() {
 #[actix_web::test]
 async fn test_register_with_email_not_already_exist() {
     let users_repository = UsersRepository::new(api_db::connection::establish_connection(&CONFIG));
+    let redis_client = api_services::redis::get_redis_client(&CONFIG);
 
     let email = "mathieulebras_notexist@gmail.com";
 
     let app = App::new()
         .app_data(web::Data::new(CONFIG.clone()))
         .app_data(web::Data::new(users_repository.clone()))
+        .app_data(web::Data::new(redis_client.clone()))
         .configure(auth::service::<UsersRepository>);
     let app = actix_web::test::init_service(app).await;
 

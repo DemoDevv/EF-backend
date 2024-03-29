@@ -4,7 +4,7 @@ extern crate redis;
 
 // type initialization
 type RedisServiceResult<T> = Result<T, redis::RedisError>; // todo: move to serviceError
-type RedisClient = redis::Client;
+pub type RedisClient = redis::Client;
 
 // public function to get a redis client
 pub fn get_redis_client(config: &Config) -> RedisClient {

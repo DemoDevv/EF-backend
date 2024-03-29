@@ -1398,6 +1398,7 @@ dependencies = [
  "futures-util",
  "jsonwebtoken",
  "r2d2",
+ "redis",
  "serde",
  "time",
  "validator",
