@@ -1,6 +1,6 @@
 # EF-backend 
 
-Ce projet est une application web construite avec le framework Actix-web en Rust. Il utilise Diesel pour interagir avec une base de données PostgreSQL et implémente une authentification basée sur des tokens JWT.
+Ce projet est une application web construite avec le framework Actix-web en Rust. Il utilise l'ORM Diesel pour interagir avec une base de données PostgreSQL et implémente une authentification basée sur des tokens JWT.
 
 ## Structure du projet 
 
