@@ -63,8 +63,8 @@ pub async fn login<R: UserRepository>(
         refresh_token: generate_refresh_token(),
     };
 
-    // TODO: set dans redis key/value avec la key = refresh_token et value = user.id
-    redis_client.update_ttl(&tokens.refresh_token, &user.id.to_string(), 10).await.map_err(|err| ServiceError::from(err))?;
+    // TODO: changer le ttl en fonction de la configuration
+    redis_client.update_ttl(&tokens.refresh_token, &user.id.to_string(), ).await.map_err(|err| ServiceError::from(err))?;
 
     Ok(HttpResponse::Ok().json(tokens))
 }
