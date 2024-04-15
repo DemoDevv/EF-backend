@@ -8,7 +8,7 @@ use api_services::auth::services::{create_valid_token, generate_refresh_token};
 use api_db::repository::UserRepository;
 use api_services::auth::errors::AuthentificationError;
 use api_services::auth::helpers::{hash_password, verify_password};
-use api_services::redis::{self, RedisClient, RedisRepository};
+use api_services::redis::{RedisClient, RedisRepository};
 use shared::config::Config;
 use shared::errors::{ServiceError, ServiceErrorType};
 use shared::extractors::user_extractor::{InputUser, RefreshableUser};
