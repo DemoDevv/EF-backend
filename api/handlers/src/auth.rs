@@ -8,10 +8,10 @@ use api_services::auth::services::{create_valid_token, generate_refresh_token};
 use api_db::repository::UserRepository;
 use api_services::auth::errors::AuthentificationError;
 use api_services::auth::helpers::{hash_password, verify_password};
-use api_services::redis::{RedisClient, RedisRepository};
+use api_services::redis::{self, RedisClient, RedisRepository};
 use shared::config::Config;
 use shared::errors::{ServiceError, ServiceErrorType};
-use shared::extractors::user_extractor::InputUser;
+use shared::extractors::user_extractor::{InputUser, RefreshableUser};
 use shared::types::roles::Role;
 use shared::types::user::NewUser;
 
@@ -20,7 +20,7 @@ pub fn service<R: UserRepository>(cfg: &mut web::ServiceConfig) {
         web::scope("/v1/auth")
             .service(web::resource("/login").route(web::post().to(login::<R>)))
             .service(web::resource("/register").route(web::post().to(register::<R>)))
-            .service(web::resource("/refresh").route(web::post().to(refresh_tokens))),
+            .service(web::resource("/refresh").route(web::post().to(refresh_tokens::<R>))),
     );
 }
 
@@ -64,7 +64,14 @@ pub async fn login<R: UserRepository>(
     };
 
     // TODO: changer le ttl en fonction de la configuration
-    redis_client.update_ttl(&tokens.refresh_token, &user.id.to_string(), config.refresh_token_ttl).await.map_err(|err| ServiceError::from(err))?;
+    redis_client
+        .update_ttl(
+            &tokens.refresh_token,
+            &user.id.to_string(),
+            config.refresh_token_ttl,
+        )
+        .await
+        .map_err(|err| ServiceError::from(err))?;
 
     Ok(HttpResponse::Ok().json(tokens))
 }
@@ -118,12 +125,71 @@ pub async fn register<R: UserRepository>(
         refresh_token: generate_refresh_token(),
     };
 
-    redis_client.update_ttl(&tokens.refresh_token, &user.id.to_string(), config.refresh_token_ttl).await.map_err(|err| ServiceError::from(err))?;
+    redis_client
+        .update_ttl(
+            &tokens.refresh_token,
+            &user.id.to_string(),
+            config.refresh_token_ttl,
+        )
+        .await
+        .map_err(|err| ServiceError::from(err))?;
 
     Ok(HttpResponse::Ok().json(tokens))
 }
 
-pub async fn refresh_tokens() -> Result<HttpResponse, Error> {
+pub async fn refresh_tokens<R: UserRepository>(
+    config: web::Data<Config>,
+    user: web::Json<RefreshableUser>,
+    redis_client: web::Data<RedisClient>,
+    user_repository: web::Data<R>,
+) -> Result<HttpResponse, Error> {
     // créer un nouveau access token et un refresh token puis modifier le refresh token dans redis
-    Ok(HttpResponse::Ok().finish())
+    user.validate().map_err(|err| ServiceError {
+        message: Some(format!("Invalid user: {}", err)),
+        error_type: ServiceErrorType::BadDeserialization,
+    })?;
+
+    let id_user = match redis_client.get(&user.refresh_token).await {
+        Ok(Some(id)) => id,
+        Ok(None) => {
+            return Err(ServiceError {
+                message: Some("Refresh token not found".to_string()),
+                error_type: ServiceErrorType::UnAuthorized,
+            }
+            .into())
+        }
+        Err(err) => return Err(ServiceError::from(err).into()),
+    }
+    .parse::<i32>()
+    .unwrap();
+
+    let user_from_db = user_repository.get(id_user).await?;
+
+    if user_from_db.email != user.email {
+        return Err(ServiceError {
+            message: Some("Email does not match".to_string()),
+            error_type: ServiceErrorType::UnAuthorized,
+        }
+        .into());
+    }
+
+    let tokens = Tokens {
+        access_token: create_valid_token(config.clone(), &user_from_db)?,
+        refresh_token: generate_refresh_token(),
+    };
+
+    redis_client
+        .delete(&user.refresh_token)
+        .await
+        .map_err(|err| ServiceError::from(err))?;
+    redis_client
+        .update_ttl(
+            &tokens.refresh_token,
+            &id_user.to_string(),
+            config.refresh_token_ttl,
+        )
+        .await
+        .map_err(|err| ServiceError::from(err))?;
+
+    Ok(HttpResponse::Ok().json(tokens))
 }
