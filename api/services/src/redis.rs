@@ -16,9 +16,9 @@ pub trait RedisRepository: Clone + Send + Sync + 'static {
     async fn ping(&self) -> RedisServiceResult<Option<String>>;
     async fn get(&self, key: &str) -> RedisServiceResult<Option<String>>;
     async fn set(&self, key: &str, value: &str) -> RedisServiceResult<()>;
-    async fn ttl(&self, key: &str) -> RedisServiceResult<i32>;
+    async fn ttl(&self, key: &str) -> RedisServiceResult<i64>;
     async fn update(&self, key: &str, value: &str) -> RedisServiceResult<()>;
-    async fn update_ttl(&self, key: &str, value: &str, ttl: i32) -> RedisServiceResult<()>;
+    async fn update_ttl(&self, key: &str, value: &str, ttl: i64) -> RedisServiceResult<()>;
     async fn delete(&self, key: &str) -> RedisServiceResult<()>;
 }
 
@@ -43,7 +43,7 @@ impl RedisRepository for RedisClient {
             .await
     }
 
-    async fn ttl(&self, key: &str) -> RedisServiceResult<i32> {
+    async fn ttl(&self, key: &str) -> RedisServiceResult<i64> {
         let mut con: redis::aio::Connection = self.get_async_connection().await?;
         redis::cmd("TTL").arg(key).query_async(&mut con).await
     }
@@ -57,7 +57,7 @@ impl RedisRepository for RedisClient {
             .await
     }
 
-    async fn update_ttl(&self, key: &str, value: &str, ttl: i32) -> RedisServiceResult<()> {
+    async fn update_ttl(&self, key: &str, value: &str, ttl: i64) -> RedisServiceResult<()> {
         let mut con: redis::aio::Connection = self.get_async_connection().await?;
         redis::cmd("SET")
             .arg(key)

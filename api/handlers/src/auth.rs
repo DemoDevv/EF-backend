@@ -59,12 +59,12 @@ pub async fn login<R: UserRepository>(
     }?;
 
     let tokens = Tokens {
-        access_token: create_valid_token(config, &user)?,
+        access_token: create_valid_token(config.clone(), &user)?,
         refresh_token: generate_refresh_token(),
     };
 
     // TODO: changer le ttl en fonction de la configuration
-    redis_client.update_ttl(&tokens.refresh_token, &user.id.to_string(), ).await.map_err(|err| ServiceError::from(err))?;
+    redis_client.update_ttl(&tokens.refresh_token, &user.id.to_string(), config.refresh_token_ttl).await.map_err(|err| ServiceError::from(err))?;
 
     Ok(HttpResponse::Ok().json(tokens))
 }
