@@ -21,6 +21,8 @@ env:
   JWT_SECRET: test
   JWT_EXPIRED_IN: 5
 
+  REFRESH_TOKEN_TTL: 60
+
 jobs:
   build:
     runs-on: ubuntu-latest

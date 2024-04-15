@@ -2,6 +2,7 @@ use actix_web::{dev::ServiceRequest, web};
 use jsonwebtoken::{
     decode, encode, Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation,
 };
+
 use time::{Duration, OffsetDateTime};
 
 use shared::{
@@ -64,4 +65,11 @@ pub fn decode_token(
         &DecodingKey::from_secret(config.jwt_secret.as_ref()),
         &validation,
     )
+}
+
+pub fn generate_refresh_token() -> String {
+    use rand::distributions::Alphanumeric;
+    use rand::{thread_rng, Rng};
+
+    thread_rng().sample_iter(&Alphanumeric).take(32).map(char::from).collect()
 }

@@ -1,3 +1,5 @@
+extern crate redis;
+
 use std::fmt;
 
 use actix_web::{http::StatusCode, HttpResponse, ResponseError};
@@ -8,6 +10,7 @@ pub enum ServiceErrorType {
     InternalServerError,
     BadDeserialization,
     DatabaseError,
+    UnAuthorized
 }
 
 #[derive(Debug)]
@@ -38,10 +41,20 @@ impl ResponseError for ServiceError {
             ServiceErrorType::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
             ServiceErrorType::BadDeserialization => StatusCode::BAD_REQUEST,
             ServiceErrorType::DatabaseError => StatusCode::INTERNAL_SERVER_ERROR,
+            ServiceErrorType::UnAuthorized => StatusCode::UNAUTHORIZED
         }
     }
 
     fn error_response(&self) -> actix_web::HttpResponse<actix_web::body::BoxBody> {
         HttpResponse::build(self.status_code()).json(self.message())
+    }
+}
+
+impl From<redis::RedisError> for ServiceError {
+    fn from(_error: redis::RedisError) -> Self {
+        ServiceError {
+            message: Some("Redis error".to_string()),
+            error_type: ServiceErrorType::DatabaseError,
+        }
     }
 }

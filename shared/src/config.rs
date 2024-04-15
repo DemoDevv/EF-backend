@@ -31,6 +31,8 @@ pub struct Config {
 
     pub jwt_secret: String,
     pub jwt_expired_in: i64,
+
+    pub refresh_token_ttl: i64,
 }
 
 impl Config {
@@ -57,6 +59,8 @@ impl Config {
         let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
         let jwt_expired_in = env::var("JWT_EXPIRED_IN").expect("JWT_EXPIRED_IN must be set");
 
+        let refresh_token_ttl = env::var("REFRESH_TOKEN_TTL").expect("REFRESH_TOKEN_TTL must be set");
+
         Config {
             development,
             version,
@@ -64,6 +68,7 @@ impl Config {
             redis_info,
             jwt_secret,
             jwt_expired_in: jwt_expired_in.parse::<i64>().unwrap(),
+            refresh_token_ttl: refresh_token_ttl.parse::<i64>().unwrap(),
         }
     }
 }
