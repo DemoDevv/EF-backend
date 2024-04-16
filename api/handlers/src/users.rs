@@ -12,13 +12,13 @@ pub fn service<R: UserRepository>(cfg: &mut web::ServiceConfig) {
             .service(
                 web::resource("")
                     .route(web::get().to(index::<R>))
-                    .route(web::post().to(store::<R>)),
+                    .route(web::post().to(store::<R>))
+                    .route(web::put().to(update_many::<R>)),
             )
             .service(
                 web::resource("/{id}")
                     .route(web::get().to(show::<R>))
                     .route(web::patch().to(update::<R>))
-                    .route(web::put().to(update_many::<R>))
                     .route(web::delete().to(destroy::<R>)),
             ),
     );
@@ -55,7 +55,7 @@ pub async fn update<R: UserRepository>(repository: web::Data<R>, id: web::Path<i
 }
 
 /// This function is used to update many users from the database
-pub async fn update_many<R: UserRepository>(repository: web::Data<R>, id: web::Path<i32>) -> Result<HttpResponse, Error> {
+pub async fn update_many<R: UserRepository>(repository: web::Data<R>) -> Result<HttpResponse, Error> {
     Ok(HttpResponse::Ok().json("Update action perfomed on users"))
 }
 
