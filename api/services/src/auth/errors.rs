@@ -12,7 +12,7 @@ impl From<argon2::password_hash::Error> for AuthentificationError {
     }
 }
 
-impl std::convert::From<AuthentificationError> for ServiceError {
+impl From<AuthentificationError> for ServiceError {
     fn from(_error: AuthentificationError) -> Self {
         ServiceError {
             message: Some("Authentification failed".to_string()),
