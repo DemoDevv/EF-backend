@@ -196,5 +196,8 @@ async fn test_refresh_tokens() {
     assert_eq!(resp.status(), StatusCode::OK);
 
     let new_tokens: Tokens = actix_web::test::read_body_json(resp).await;
-    redis_client.delete(&new_tokens.refresh_token).await.unwrap();
+    redis_client
+        .delete(&new_tokens.refresh_token)
+        .await
+        .unwrap();
 }

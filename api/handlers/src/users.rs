@@ -3,6 +3,7 @@ use actix_web_httpauth::middleware::HttpAuthentication;
 
 use api_db::repository::UserRepository;
 use api_services::auth::middleware::validator;
+use shared::types::user::SafeUser;
 
 pub fn service<R: UserRepository>(cfg: &mut web::ServiceConfig) {
     cfg.service(
@@ -22,11 +23,12 @@ pub fn service<R: UserRepository>(cfg: &mut web::ServiceConfig) {
     );
 }
 
-/// This function is used to get all entities from the database
+/// This function is used to get all entities from the database without password field
 pub async fn index<R: UserRepository>(repository: web::Data<R>) -> Result<HttpResponse, Error> {
     Ok(repository
         .get_all()
         .await
+        .map(|users| users.into_iter().map(|user| user.into()).collect::<Vec<SafeUser>>())
         .map(|users| HttpResponse::Ok().json(users))?)
 }
 
@@ -43,7 +45,7 @@ pub async fn show<R: UserRepository>(
     Ok(repository
         .get(id.into_inner())
         .await
-        .map(|user| HttpResponse::Ok().json(user))?)
+        .map(|user| HttpResponse::Ok().json(SafeUser::from(user)))?)
 }
 
 /// This function is used to update a user from the database
