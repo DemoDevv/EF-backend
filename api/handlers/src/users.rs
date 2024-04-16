@@ -18,12 +18,13 @@ pub fn service<R: UserRepository>(cfg: &mut web::ServiceConfig) {
                 web::resource("/{id}")
                     .route(web::get().to(show::<R>))
                     .route(web::patch().to(update::<R>))
+                    .route(web::put().to(update_many::<R>))
                     .route(web::delete().to(destroy::<R>)),
             ),
     );
 }
 
-/// This function is used to get all entities from the database without password field
+/// This function is used to get all entities from the database
 pub async fn index<R: UserRepository>(repository: web::Data<R>) -> Result<HttpResponse, Error> {
     Ok(repository
         .get_all()
@@ -51,6 +52,11 @@ pub async fn show<R: UserRepository>(
 /// This function is used to update a user from the database
 pub async fn update<R: UserRepository>(repository: web::Data<R>, id: web::Path<i32>) -> Result<HttpResponse, Error> {
     Ok(HttpResponse::Ok().json("Update action perfomed on the user"))
+}
+
+/// This function is used to update many users from the database
+pub async fn update_many<R: UserRepository>(repository: web::Data<R>, id: web::Path<i32>) -> Result<HttpResponse, Error> {
+    Ok(HttpResponse::Ok().json("Update action perfomed on users"))
 }
 
 /// This function is used to delete a user from the database
