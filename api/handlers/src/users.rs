@@ -18,7 +18,7 @@ pub fn service<R: UserRepository>(cfg: &mut web::ServiceConfig) {
                 web::resource("/{id}")
                     .route(web::get().to(show::<R>))
                     .route(web::patch().to(update::<R>))
-                    .route(web::put().to(update_many::<R>))
+                    .route(web::put().to(replace::<R>))
                     .route(web::delete().to(destroy::<R>)),
             ),
     );
@@ -49,14 +49,14 @@ pub async fn show<R: UserRepository>(
         .map(|user| HttpResponse::Ok().json(SafeUser::from(user)))?)
 }
 
-/// This function is used to update a user from the database
+/// This function is used to update partial content of a user from the database
 pub async fn update<R: UserRepository>(repository: web::Data<R>, id: web::Path<i32>) -> Result<HttpResponse, Error> {
     Ok(HttpResponse::Ok().json("Update action perfomed on the user"))
 }
 
-/// This function is used to update many users from the database
-pub async fn update_many<R: UserRepository>(repository: web::Data<R>, id: web::Path<i32>) -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().json("Update action perfomed on users"))
+/// This function is used to update a user from the database
+pub async fn replace<R: UserRepository>(repository: web::Data<R>, id: web::Path<i32>) -> Result<HttpResponse, Error> {
+    Ok(HttpResponse::Ok().json("Update action perfomed on the user"))
 }
 
 /// This function is used to delete a user from the database
