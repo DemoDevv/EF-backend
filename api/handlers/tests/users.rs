@@ -107,6 +107,35 @@ async fn test_patch_one_user() {
 }
 
 #[actix_web::test]
+async fn test_replace_one_user() {
+    let user = generate_user(&USERS_REPOSITORY).await;
+
+    let app = App::new()
+        .app_data(web::Data::new(CONFIG.clone()))
+        .app_data(web::Data::new(USERS_REPOSITORY.clone()))
+        .configure(users::service::<UsersRepository>);
+    let app = actix_web::test::init_service(app).await;
+
+    let req = actix_web::test::TestRequest::put()
+        .uri(format!("/v1/users/{}", user.id).as_str())
+        .append_header(("Authorization", TOKEN_FOR_TEST))
+        .set_json(&serde_json::json!({
+            "first_name": "jhon",
+            "last_name": "Doee",
+            "email": "cestplusjhondoe@gmail.com",
+            "created_at": chrono::Local::now().naive_local(),
+            "password": "test",
+            "role": Role::User.to_string(),
+        }))
+        .to_request();
+    let resp = actix_web::test::call_service(&app, req).await;
+
+    USERS_REPOSITORY.delete(user.id).await.unwrap();
+
+    assert_eq!(resp.status(), StatusCode::OK);
+}
+
+#[actix_web::test]
 async fn test_delete_one_user() {
     let user = generate_user(&USERS_REPOSITORY).await;
 
