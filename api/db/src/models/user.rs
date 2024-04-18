@@ -1,5 +1,5 @@
 use diesel::prelude::*;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use shared::types::user::SafeUser;
 
@@ -31,7 +31,7 @@ impl From<User> for SafeUser {
     }
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Deserialize, Serialize)]
 #[diesel(table_name = users)]
 pub struct InsertableUser<'a> {
     pub first_name: &'a str,

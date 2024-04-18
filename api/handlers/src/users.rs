@@ -3,7 +3,7 @@ use actix_web_httpauth::middleware::HttpAuthentication;
 
 use api_db::repository::UserRepository;
 use api_services::auth::middleware::validator;
-use shared::types::user::SafeUser;
+use shared::{extractors::user_extractor::UpdatableUser, types::user::{NewUser, SafeUser}};
 
 pub fn service<R: UserRepository>(cfg: &mut web::ServiceConfig) {
     cfg.service(
@@ -50,12 +50,12 @@ pub async fn show<R: UserRepository>(
 }
 
 /// This function is used to update partial content of a user from the database
-pub async fn update<R: UserRepository>(repository: web::Data<R>, id: web::Path<i32>) -> Result<HttpResponse, Error> {
+pub async fn update<R: UserRepository>(repository: web::Data<R>, id: web::Path<i32>, updatable_user: web::Json<UpdatableUser>) -> Result<HttpResponse, Error> {
     Ok(HttpResponse::Ok().json("Update action perfomed on the user"))
 }
 
 /// This function is used to update a user from the database
-pub async fn replace<R: UserRepository>(repository: web::Data<R>, id: web::Path<i32>) -> Result<HttpResponse, Error> {
+pub async fn replace<R: UserRepository>(repository: web::Data<R>, id: web::Path<i32>, new_user: web::Json<NewUser>) -> Result<HttpResponse, Error> {
     Ok(HttpResponse::Ok().json("Update action perfomed on the user"))
 }
 
