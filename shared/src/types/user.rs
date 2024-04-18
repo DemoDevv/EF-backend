@@ -10,6 +10,11 @@ pub struct NewUser {
     pub role: String,
 }
 
+pub struct NewUserWithId {
+    pub id: i32,
+    pub user: NewUser,
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct SafeUser {
     pub id: i32,

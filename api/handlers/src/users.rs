@@ -1,9 +1,9 @@
 use actix_web::{web, Error, HttpResponse};
 use actix_web_httpauth::middleware::HttpAuthentication;
 
-use api_db::repository::UserRepository;
+use api_db::{models::user::User, repository::UserRepository};
 use api_services::auth::middleware::validator;
-use shared::{extractors::user_extractor::UpdatableUser, types::user::{NewUser, SafeUser}};
+use shared::{extractors::user_extractor::UpdatableUser, types::user::{NewUser, NewUserWithId, SafeUser}};
 
 pub fn service<R: UserRepository>(cfg: &mut web::ServiceConfig) {
     cfg.service(
@@ -56,7 +56,15 @@ pub async fn update<R: UserRepository>(repository: web::Data<R>, id: web::Path<i
 
 /// This function is used to update a user from the database
 pub async fn replace<R: UserRepository>(repository: web::Data<R>, id: web::Path<i32>, new_user: web::Json<NewUser>) -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().json("Update action perfomed on the user"))
+    let user = User::from(NewUserWithId {
+        id: id.clone(),
+        user: new_user.into_inner(),
+    });
+
+    Ok(repository
+        .update(id.into_inner(), &user)
+        .await
+        .map(|_| HttpResponse::Ok().json("Update action perfomed on the user"))?)
 }
 
 /// This function is used to delete a user from the database

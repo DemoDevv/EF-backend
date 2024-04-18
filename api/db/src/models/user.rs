@@ -1,7 +1,7 @@
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use shared::types::user::SafeUser;
+use shared::types::user::{NewUserWithId, SafeUser};
 
 use crate::schema::users;
 
@@ -27,6 +27,20 @@ impl From<User> for SafeUser {
             email: user.email,
             created_at: user.created_at,
             role: user.role,
+        }
+    }
+}
+
+impl From<NewUserWithId> for User {
+    fn from(user: NewUserWithId) -> Self {
+        User {
+            id: user.id,
+            first_name: user.user.first_name,
+            last_name: user.user.last_name,
+            email: user.user.email,
+            created_at: user.user.created_at,
+            password: user.user.password,
+            role: user.user.role,
         }
     }
 }
