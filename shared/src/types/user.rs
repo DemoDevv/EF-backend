@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::extractors::user_extractor::UserPayload;
+
 #[derive(Serialize, Deserialize)]
 pub struct NewUser {
     pub first_name: String,
@@ -12,7 +14,7 @@ pub struct NewUser {
 
 pub struct NewUserWithId {
     pub id: i32,
-    pub user: NewUser,
+    pub user: UserPayload,
 }
 
 #[derive(Serialize, Deserialize)]

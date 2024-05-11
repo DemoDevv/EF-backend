@@ -1,11 +1,17 @@
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use shared::types::user::{NewUserWithId, SafeUser};
+use shared::{
+    extractors::user_extractor::UpdatableUser,
+    types::user::{NewUserWithId, SafeUser},
+};
 
-use crate::schema::users;
+use crate::{
+    schema::users,
+    update::{Updatable, UpdateResult},
+};
 
-#[derive(Queryable, Selectable, Serialize, AsChangeset, Identifiable, Clone)]
+#[derive(Queryable, Selectable, Serialize, Deserialize, AsChangeset, Identifiable, Clone)]
 #[diesel(table_name = users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct User {
@@ -16,6 +22,18 @@ pub struct User {
     pub created_at: chrono::NaiveDateTime,
     pub password: String,
     pub role: String,
+}
+
+impl Updatable<UpdatableUser, User> for User {
+    fn perform_convert(&self, updatable_user: UpdatableUser) -> UpdateResult<User> {
+        let user = self.clone();
+        let updated_user = User {
+            email: updatable_user.email.unwrap_or(user.email),
+            password: updatable_user.password.unwrap_or(user.password),
+            ..user
+        };
+        Ok(updated_user)
+    }
 }
 
 impl From<User> for SafeUser {

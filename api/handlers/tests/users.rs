@@ -98,12 +98,22 @@ async fn test_patch_one_user() {
     let req = actix_web::test::TestRequest::patch()
         .uri(format!("/v1/users/{}", user.id).as_str())
         .append_header(("Authorization", TOKEN_FOR_TEST))
+        .set_json(&serde_json::json!({
+            "email": "cestplusjhondoe@gmail.com",
+            "password": "test",
+        }))
         .to_request();
     let resp = actix_web::test::call_service(&app, req).await;
 
     USERS_REPOSITORY.delete(user.id).await.unwrap();
 
     assert_eq!(resp.status(), StatusCode::OK);
+
+    let body = actix_web::test::read_body(resp).await;
+    let user: User =
+        serde_json::from_slice(&body).expect("Failed to parse response body into user");
+
+    assert_eq!(user.email, "cestplusjhondoe@gmail.com")
 }
 
 #[actix_web::test]
@@ -133,6 +143,12 @@ async fn test_replace_one_user() {
     USERS_REPOSITORY.delete(user.id).await.unwrap();
 
     assert_eq!(resp.status(), StatusCode::OK);
+
+    let body = actix_web::test::read_body(resp).await;
+    let user: User =
+        serde_json::from_slice(&body).expect("Failed to parse response body into user");
+
+    assert_eq!(user.email, "cestplusjhondoe@gmail.com")
 }
 
 #[actix_web::test]
