@@ -314,6 +314,8 @@ name = "api-middlewares"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "api-services",
+ "futures-core",
  "futures-util",
  "shared",
 ]

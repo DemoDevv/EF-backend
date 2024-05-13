@@ -9,4 +9,6 @@ edition = "2021"
 actix-web = "4.4.0"
 futures-util = "0.3.30"
 
-shared = { path = "../../shared"}
+shared = { path = "../../shared" }
+api-services = { path = "../services" }
+futures-core = "0.3.30"
