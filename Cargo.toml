@@ -5,7 +5,7 @@
 
 [workspace]
 members = [
-    "api/db",
+    "api/db", "api/errors", "api/extractors",
     "api/handlers", 
     "api/middlewares",
     "api/services",
