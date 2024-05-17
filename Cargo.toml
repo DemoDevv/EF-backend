@@ -8,7 +8,7 @@ members = [
     "api/db", "api/errors", "api/extractors",
     "api/handlers", 
     "api/middlewares",
-    "api/services",
+    "api/services", "api/types",
     "bootstrap",
     "shared"
 ]

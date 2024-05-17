@@ -280,6 +280,7 @@ name = "api-db"
 version = "0.1.0"
 dependencies = [
  "actix-rt",
+ "api-types",
  "async-trait",
  "chrono",
  "diesel",
@@ -311,6 +312,7 @@ dependencies = [
  "api-db",
  "api-middlewares",
  "api-services",
+ "api-types",
  "argon2",
  "async-trait",
  "chrono",
@@ -355,6 +357,15 @@ dependencies = [
  "serde",
  "shared",
  "time",
+ "validator",
+]
+
+[[package]]
+name = "api-types"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "serde",
  "validator",
 ]
 
