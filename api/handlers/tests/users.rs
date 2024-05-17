@@ -5,7 +5,7 @@ use api_db::{models::user::User, repositories::users_repository::UsersRepository
 use once_cell::sync::Lazy;
 
 use api_handlers::users;
-use shared::types::{roles::Role, user::NewUser};
+use api_types::{roles::Role, user::NewUser};
 
 const CONFIG: Lazy<shared::config::Config> = Lazy::new(|| shared::config::Config::init());
 const TOKEN_FOR_TEST: &str = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXRoaWV1bGVicmFhYXNAZ21haWwuY29tIiwiaWF0IjoxNzExMTI0MzQxLCJleHAiOjE3NjI5NjQzNDEsInJvbGUiOiJ1c2VyIn0.OfP32SVlG0XcV5Pf-LIJt9T6j1g0cCFaUnW00k3dL1w";

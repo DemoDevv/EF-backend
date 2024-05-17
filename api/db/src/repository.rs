@@ -1,5 +1,6 @@
 use crate::models::user::User;
-use shared::{errors, types::user::NewUser};
+use api_types::user::NewUser;
+use shared::errors;
 
 pub type RepositoryResult<T> = Result<T, errors::ServiceError>;
 

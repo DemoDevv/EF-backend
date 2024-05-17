@@ -3,8 +3,8 @@ use diesel::prelude::*;
 use crate::connection::Pool;
 use crate::models::user::{InsertableUser, User};
 use crate::schema::users;
+use api_types::user::NewUser;
 use shared::errors::ServiceError;
-use shared::types::user::NewUser;
 
 use crate::repository::{Repository, RepositoryResult, UserRepository};
 
@@ -153,7 +153,7 @@ mod tests {
                 email: GOOD_EMAIL.to_string(),
                 created_at: chrono::Local::now().naive_local(),
                 password: GOOD_PASSWORD.to_string(),
-                role: shared::types::roles::Role::User.to_string(),
+                role: api_types::roles::Role::User.to_string(),
             })
             .await
             .unwrap()

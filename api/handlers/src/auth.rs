@@ -9,11 +9,11 @@ use api_db::repository::UserRepository;
 use api_services::auth::errors::AuthentificationError;
 use api_services::auth::helpers::{hash_password, verify_password};
 use api_services::redis::{RedisClient, RedisRepository};
+use api_types::roles::Role;
+use api_types::user::NewUser;
+use api_types::user::{InputUser, RefreshableUser};
 use shared::config::Config;
 use shared::errors::{ServiceError, ServiceErrorType};
-use shared::types::roles::Role;
-use shared::types::user::NewUser;
-use shared::types::user::{InputUser, RefreshableUser};
 
 pub fn service<R: UserRepository>(cfg: &mut web::ServiceConfig) {
     cfg.service(

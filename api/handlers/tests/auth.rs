@@ -7,8 +7,8 @@ use api_handlers::auth;
 use api_db::repository::{Repository, UserRepository};
 use api_services::auth::types::Tokens;
 use api_services::redis::RedisRepository;
-use shared::types::roles::Role;
-use shared::types::user::NewUser;
+use api_types::roles::Role;
+use api_types::user::NewUser;
 
 use once_cell::sync::Lazy;
 

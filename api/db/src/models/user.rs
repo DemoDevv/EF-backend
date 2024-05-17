@@ -1,7 +1,7 @@
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use shared::types::user::{NewUserWithId, SafeUser, UpdatableUser};
+use api_types::user::{NewUserWithId, SafeUser, UpdatableUser};
 
 use crate::{
     schema::users,
