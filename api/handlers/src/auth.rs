@@ -37,6 +37,7 @@ pub async fn login<R: UserRepository>(
     })?;
 
     let generique_error = ServiceError {
+        // TODO: make this error in a const file
         message: Some("Authentification failed".to_string()),
         error_type: ServiceErrorType::BadAuthentification,
     };
