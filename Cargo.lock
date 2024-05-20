@@ -301,6 +301,7 @@ name = "api-extractors"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "api-services",
 ]
 
 [[package]]
@@ -330,6 +331,7 @@ name = "api-middlewares"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "actix-web-httpauth",
  "api-services",
  "futures-core",
  "futures-util",
