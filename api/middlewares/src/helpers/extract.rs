@@ -10,7 +10,7 @@ use futures_util::future::{LocalBoxFuture, TryFutureExt as _};
 
 use actix_web::{dev::ServiceRequest, Error, FromRequest};
 
-struct Extract<T> {
+pub(crate) struct Extract<T> {
     req: Option<ServiceRequest>,
     fut: Option<LocalBoxFuture<'static, Result<T, Error>>>,
     _extractor: PhantomData<fn() -> T>,
@@ -35,6 +35,7 @@ where
     type Output = Result<(ServiceRequest, T), (Error, ServiceRequest)>;
 
     fn poll(mut self: Pin<&mut Self>, ctx: &mut Context<'_>) -> Poll<Self::Output> {
+        // poll function can be called multiple times, so we need to check if future is already initialized
         if self.fut.is_none() {
             let req = self.req.as_mut().expect("Extract future was polled twice!");
             let fut = req.extract::<T>().map_err(Into::into);
