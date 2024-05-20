@@ -2,6 +2,7 @@ use shared::config::Config;
 
 extern crate redis;
 
+pub mod errors;
 pub mod models;
 
 // type initialization
