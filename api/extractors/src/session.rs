@@ -5,8 +5,8 @@ use std::{
 
 use actix_web::{Error, FromRequest, HttpMessage};
 
+use api_middlewares::redis_session_middleware::SessionPayload;
 use api_services::redis::errors::SessionError;
-use api_services::redis::models::Session as SessionPayload;
 
 pub struct Session(SessionPayload);
 

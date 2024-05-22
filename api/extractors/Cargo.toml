@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 actix-web = "4.4.0"
 api-services = { path = "../services" }
+api-middlewares = { path = "../middlewares" }
