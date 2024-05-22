@@ -64,7 +64,6 @@ pub async fn login<R: UserRepository>(
         refresh_token: generate_refresh_token(),
     };
 
-    // TODO: changer le ttl en fonction de la configuration
     redis_client
         .update_ttl(
             &tokens.refresh_token,
