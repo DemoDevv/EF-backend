@@ -1,6 +1,6 @@
 use std::env;
 
-use crate::parse::choice;
+use crate::parse::{boolean, choice};
 
 #[derive(Clone)]
 pub struct RedisInfo {
@@ -43,7 +43,14 @@ impl Config {
     pub fn init() -> Config {
         dotenv::dotenv().ok();
 
-        let development = env::var("DEVELOPMENT").is_ok();
+        let development = boolean()
+            .parse::<bool>(
+                env::var("DEVELOPMENT")
+                    .expect("DEVELOPMENT must be set")
+                    .parse()
+                    .unwrap(),
+            )
+            .expect("DEVELOPMENT must be a boolean");
         let version = env::var("VERSION").expect("VERSION must be set");
 
         let auth_driver = choice(vec!["session", "jwt"])
