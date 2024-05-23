@@ -1,5 +1,7 @@
 use std::env;
 
+use crate::parse::choice;
+
 #[derive(Clone)]
 pub struct RedisInfo {
     pub host: String,
@@ -25,6 +27,8 @@ pub struct Config {
     pub development: bool,
     pub version: String,
 
+    pub auth_driver: String,
+
     pub database_url: String,
 
     pub redis_info: RedisInfo,
@@ -41,6 +45,10 @@ impl Config {
 
         let development = env::var("DEVELOPMENT").is_ok();
         let version = env::var("VERSION").expect("VERSION must be set");
+
+        let auth_driver = choice(vec!["session", "jwt"])
+            .parse(env::var("AUTH_DRIVER").expect("AUTH_DRIVER must be set"))
+            .expect("AUTH_DRIVER must be in choices");
 
         let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
@@ -59,11 +67,13 @@ impl Config {
         let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
         let jwt_expired_in = env::var("JWT_EXPIRED_IN").expect("JWT_EXPIRED_IN must be set");
 
-        let refresh_token_ttl = env::var("REFRESH_TOKEN_TTL").expect("REFRESH_TOKEN_TTL must be set");
+        let refresh_token_ttl =
+            env::var("REFRESH_TOKEN_TTL").expect("REFRESH_TOKEN_TTL must be set");
 
         Config {
             development,
             version,
+            auth_driver,
             database_url,
             redis_info,
             jwt_secret,
