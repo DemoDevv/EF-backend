@@ -1,4 +1,7 @@
-#[derive(Debug, Clone)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Session {
-    email: String,
+    pub email: String,
+    pub role: String,
 }
