@@ -22,5 +22,6 @@ api-db = { path = "../db" }
 api-services = { path = "../services" }
 api-middlewares = { path = "../middlewares" }
 api-types = { path = "../types" }
+api-extractors = { path = "../extractors" }
 
 shared = { path = "../../shared" }
