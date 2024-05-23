@@ -276,6 +276,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "api-configs"
+version = "0.1.0"
+dependencies = [
+ "dotenv",
+ "once_cell",
+]
+
+[[package]]
 name = "api-db"
 version = "0.1.0"
 dependencies = [
@@ -301,6 +309,7 @@ name = "api-extractors"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "api-middlewares",
  "api-services",
 ]
 
@@ -311,6 +320,7 @@ dependencies = [
  "actix-web",
  "actix-web-httpauth",
  "api-db",
+ "api-extractors",
  "api-middlewares",
  "api-services",
  "api-types",
@@ -335,6 +345,7 @@ dependencies = [
  "api-services",
  "futures-core",
  "futures-util",
+ "serde_json",
  "shared",
 ]
 
@@ -1375,9 +1386,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.114"
+version = "1.0.117"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c5f09b1bd632ef549eaa9f60a1f8de742bdbc698e6cee2095fc84dde5f549ae0"
+checksum = "455182ea6142b14f93f4bc5320a2b31c1f266b66a4a5c858b013302a5d8cbfc3"
 dependencies = [
  "itoa",
  "ryu",
@@ -1426,6 +1437,7 @@ dependencies = [
  "dotenv",
  "futures-util",
  "jsonwebtoken",
+ "once_cell",
  "r2d2",
  "redis",
  "serde",

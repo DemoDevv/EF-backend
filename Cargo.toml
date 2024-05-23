@@ -4,7 +4,7 @@
 # edition = "2021"
 
 [workspace]
-members = [
+members = [ "api/configs",
     "api/db", "api/errors", "api/extractors",
     "api/handlers", 
     "api/middlewares",
