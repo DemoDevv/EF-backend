@@ -1,6 +1,6 @@
 use std::env;
 
-use crate::parse::{boolean, choice};
+use crate::parse::{boolean, choices};
 
 #[derive(Clone)]
 pub struct RedisInfo {
@@ -53,22 +53,17 @@ impl Config {
             .expect("DEVELOPMENT must be a boolean");
         let version = env::var("VERSION").expect("VERSION must be set");
 
-        let auth_driver = choice(vec!["session", "jwt"])
+        let auth_driver = choices(vec!["session", "jwt"])
             .parse(env::var("AUTH_DRIVER").expect("AUTH_DRIVER must be set"))
             .expect("AUTH_DRIVER must be in choices");
 
         let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
-        let redis_host = env::var("REDIS_HOST").expect("REDIS_HOST must be set");
-        let redis_port = env::var("REDIS_PORT").expect("REDIS_PORT must be set");
-        let redis_username = env::var("REDIS_USERNAME").expect("REDIS_USERNAME must be set");
-        let redis_password = env::var("REDIS_PASSWORD").expect("REDIS_PASSWORD must be set");
-
         let redis_info = RedisInfo {
-            host: redis_host,
-            port: redis_port,
-            username: redis_username,
-            password: redis_password,
+            host: env::var("REDIS_HOST").expect("REDIS_HOST must be set"),
+            port: env::var("REDIS_PORT").expect("REDIS_PORT must be set"),
+            username: env::var("REDIS_USERNAME").expect("REDIS_USERNAME must be set"),
+            password: env::var("REDIS_PASSWORD").expect("REDIS_PASSWORD must be set"),
         };
 
         let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");

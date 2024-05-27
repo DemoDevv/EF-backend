@@ -74,7 +74,7 @@ impl<T: std::cmp::PartialEq> Choices<T> {
 ///   }
 /// }
 /// ```
-pub fn choice(choices: Vec<&str>) -> Choices<String> {
+pub fn choices(choices: Vec<&str>) -> Choices<String> {
     Choices(choices.iter().map(|s| s.to_string()).collect())
 }
 
