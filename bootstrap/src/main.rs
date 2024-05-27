@@ -9,6 +9,14 @@ mod routes;
 async fn main() -> std::io::Result<()> {
     let config = shared::config::Config::init();
 
+    if config.auth_driver == "session" {
+        println!("🔒 Authentification par session.");
+    } else if config.auth_driver == "jwt" {
+        println!("🔒 Authentification par JWT.");
+    } else {
+        println!("🔒 Authentification par défaut.");
+    }
+
     let pg_connection: Pool = api_db::connection::establish_connection(&config);
 
     let redis_client = api_services::redis::get_redis_client(&config);
