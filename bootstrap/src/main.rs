@@ -7,15 +7,19 @@ mod routes;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let config = shared::config::Config::init();
+    let mut mutable_config = shared::config::Config::init();
 
-    if config.auth_driver == "session" {
+    if mutable_config.auth_driver == "session" {
         println!("🔒 Authentification par session.");
-    } else if config.auth_driver == "jwt" {
+    } else if mutable_config.auth_driver == "jwt" {
         println!("🔒 Authentification par JWT.");
     } else {
         println!("🔒 Authentification par défaut.");
+        mutable_config.auth_driver = "session".to_string();
     }
+
+    // we don't need to change the config anymore
+    let config = mutable_config;
 
     let pg_connection: Pool = api_db::connection::establish_connection(&config);
 
