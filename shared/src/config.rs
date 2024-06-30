@@ -54,7 +54,7 @@ impl Config {
             .expect("DEVELOPMENT must be a boolean");
         let version = env::var("VERSION").expect("VERSION must be set");
 
-        let auth_driver = choices(vec!["session", "jwt"])
+        let auth_driver = choices(vec!["session", "jwt", "oauth"])
             .parse(env::var("AUTH_DRIVER").expect("AUTH_DRIVER must be set"))
             .expect("AUTH_DRIVER must be in choices");
 
