@@ -37,6 +37,7 @@ pub struct Config {
     pub jwt_expired_in: i64,
 
     pub refresh_token_ttl: i64,
+    pub session_ttl: i64,
 }
 
 impl Config {
@@ -72,6 +73,8 @@ impl Config {
         let refresh_token_ttl =
             env::var("REFRESH_TOKEN_TTL").expect("REFRESH_TOKEN_TTL must be set");
 
+        let session_ttl = env::var("SESSION_TTL").expect("SESSION_TTL must be set");
+
         Config {
             development,
             version,
@@ -81,6 +84,7 @@ impl Config {
             jwt_secret,
             jwt_expired_in: jwt_expired_in.parse::<i64>().unwrap(),
             refresh_token_ttl: refresh_token_ttl.parse::<i64>().unwrap(),
+            session_ttl: session_ttl.parse::<i64>().unwrap(),
         }
     }
 }

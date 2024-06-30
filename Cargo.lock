@@ -1429,20 +1429,9 @@ name = "shared"
 version = "0.1.0"
 dependencies = [
  "actix-web",
- "actix-web-httpauth",
- "argon2",
- "async-trait",
- "chrono",
- "diesel",
  "dotenv",
- "futures-util",
- "jsonwebtoken",
  "once_cell",
- "r2d2",
  "redis",
- "serde",
- "time",
- "validator",
 ]
 
 [[package]]

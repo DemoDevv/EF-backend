@@ -9,7 +9,7 @@ use shared::config::Config;
 
 pub fn service(cfg: &mut web::ServiceConfig) {
     cfg.service(
-        web::scope("/secure")
+        web::scope("/v1/secure")
             .service(
                 web::scope("/test-session")
                     .wrap(api_middlewares::redis_session_middleware::RedisSessionMiddlewareFactory::new(
@@ -18,7 +18,7 @@ pub fn service(cfg: &mut web::ServiceConfig) {
                     .service(web::resource("").route(web::get().to(test_session))),
             )
             .service(
-                web::scope("/test")
+                web::scope("/test-jwt")
                     .wrap(HttpAuthentication::bearer(validator))
                     .service(web::resource("").route(web::get().to(test))),
             ),
@@ -32,6 +32,7 @@ pub async fn test(config: web::Data<Config>, token: BearerAuth) -> Result<HttpRe
     Ok(HttpResponse::Ok().json("good token, you have the role: ".to_string() + &claims.role))
 }
 
+// TODO: manque des tests
 pub async fn test_session(session: Session) -> Result<HttpResponse, Error> {
     Ok(HttpResponse::Ok().json("good session, you have the email: ".to_string() + &session.email))
 }

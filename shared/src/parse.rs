@@ -26,14 +26,14 @@ impl<T: std::cmp::PartialEq> Choices<T> {
     /// * `Error` - an error if the value is not in the set of choices
     /// # Example
     /// ```
-    /// use shared::parse::choice;
+    /// use shared::parse::choices;
     ///
-    /// let choices = choice(vec!["a", "b", "c"]);
-    /// let value = choices.parse("a".to_string()).unwrap();
+    /// let choice = choices(vec!["a", "b", "c"]);
+    /// let value = choice.parse("a".to_string()).unwrap();
     /// assert_eq!(value, "a");
     ///
-    /// let choices = choice(vec!["a", "b", "c"]);
-    /// let value = choices.parse("d".to_string());
+    /// let choice = choices(vec!["a", "b", "c"]);
+    /// let value = choice.parse("d".to_string());
     /// assert!(value.is_err());
     /// ```
     pub fn parse<P>(&self, value: P) -> Result<T, Error>
@@ -56,7 +56,7 @@ impl<T: std::cmp::PartialEq> Choices<T> {
 /// * `Choices` - a Choices struct that can be used to parse the value of the environment variable
 /// # Example
 /// ```
-/// use shared::parse::choice;
+/// use shared::parse::choices;
 /// use std::env;
 ///
 /// struct Config {
@@ -67,7 +67,7 @@ impl<T: std::cmp::PartialEq> Choices<T> {
 ///    pub fn new() -> Config {
 ///       dotenv::dotenv().ok();
 ///       Config {
-///         auth_driver:  choice(vec!["session", "jwt"])
+///         auth_driver:  choices(vec!["session", "jwt"])
 ///    .parse(env::var("AUTH_DRIVER").expect("AUTH_DRIVER must be set"))
 ///    .expect("AUTH_DRIVER must be in choices"),
 ///      }

@@ -10,6 +10,8 @@ use rand::Rng;
 ///
 /// # Example
 /// ```
+/// use api_services::redis::services::generate_session_token;
+///
 /// let token = generate_session_token();
 /// ```
 pub fn generate_session_token() -> String {

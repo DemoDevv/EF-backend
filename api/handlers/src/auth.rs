@@ -1,5 +1,7 @@
 use actix_web::{web, Error, HttpResponse};
 use api_services::auth::types::Tokens;
+use api_services::redis::models::Session;
+use api_services::redis::services::generate_session_token;
 use argon2::PasswordHash;
 use validator::Validate;
 
@@ -10,8 +12,7 @@ use api_services::auth::errors::AuthentificationError;
 use api_services::auth::helpers::{hash_password, verify_password};
 use api_services::redis::{RedisClient, RedisRepository};
 use api_types::roles::Role;
-use api_types::user::NewUser;
-use api_types::user::{InputUser, RefreshableUser};
+use api_types::user::{InputUser, NewUser, RefreshableUser};
 use shared::config::Config;
 use shared::errors::{ServiceError, ServiceErrorType};
 
@@ -59,21 +60,41 @@ pub async fn login<R: UserRepository>(
         Err(_) => Err(generique_error),
     }?;
 
-    let tokens = Tokens {
-        access_token: create_valid_token(config.clone(), &user)?,
-        refresh_token: generate_refresh_token(),
-    };
+    // handle the case of a jwt auth driver
+    if config.auth_driver.as_str() == "jwt" {
+        let tokens = Tokens {
+            access_token: create_valid_token(config.clone(), &user)?,
+            refresh_token: generate_refresh_token(),
+        };
 
+        redis_client
+            .update_ttl(
+                &tokens.refresh_token,
+                &user.id.to_string(),
+                config.refresh_token_ttl,
+            )
+            .await
+            .map_err(|err| ServiceError::from(err))?;
+
+        return Ok(HttpResponse::Ok().json(tokens));
+    }
+
+    // TODO: ajouter des barrières pour que un utilisateur ne puisse pas spam les routes d'auth
+    let token = generate_session_token();
+    let session = Session {
+        email: user.email.clone(),
+        role: user.role.clone(),
+    };
     redis_client
         .update_ttl(
-            &tokens.refresh_token,
-            &user.id.to_string(),
-            config.refresh_token_ttl,
+            &token,
+            &serde_json::to_string(&session)?,
+            config.session_ttl,
         )
         .await
         .map_err(|err| ServiceError::from(err))?;
 
-    Ok(HttpResponse::Ok().json(tokens))
+    Ok(HttpResponse::Ok().json(token))
 }
 
 pub async fn register<R: UserRepository>(
@@ -120,21 +141,40 @@ pub async fn register<R: UserRepository>(
         }
     }?;
 
-    let tokens = Tokens {
-        access_token: create_valid_token(config.clone(), &user)?,
-        refresh_token: generate_refresh_token(),
-    };
+    // handle the case of a jwt auth driver
+    if config.auth_driver.as_str() == "jwt" {
+        let tokens = Tokens {
+            access_token: create_valid_token(config.clone(), &user)?,
+            refresh_token: generate_refresh_token(),
+        };
 
+        redis_client
+            .update_ttl(
+                &tokens.refresh_token,
+                &user.id.to_string(),
+                config.refresh_token_ttl,
+            )
+            .await
+            .map_err(|err| ServiceError::from(err))?;
+
+        return Ok(HttpResponse::Ok().json(tokens));
+    }
+
+    let token = generate_session_token();
+    let session = Session {
+        email: user.email.clone(),
+        role: user.role.clone(),
+    };
     redis_client
         .update_ttl(
-            &tokens.refresh_token,
-            &user.id.to_string(),
-            config.refresh_token_ttl,
+            &token,
+            &serde_json::to_string(&session)?,
+            config.session_ttl,
         )
         .await
         .map_err(|err| ServiceError::from(err))?;
 
-    Ok(HttpResponse::Ok().json(tokens))
+    Ok(HttpResponse::Ok().json(token))
 }
 
 pub async fn refresh_tokens<R: UserRepository>(
