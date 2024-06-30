@@ -2,6 +2,10 @@ use shared::config::Config;
 
 extern crate redis;
 
+pub mod errors;
+pub mod models;
+pub mod services;
+
 // type initialization
 type RedisServiceResult<T> = Result<T, redis::RedisError>; // todo: move to serviceError
 pub type RedisClient = redis::Client;

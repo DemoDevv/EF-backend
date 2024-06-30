@@ -1,10 +1,7 @@
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use shared::{
-    extractors::user_extractor::UpdatableUser,
-    types::user::{NewUserWithId, SafeUser},
-};
+use api_types::user::{NewUserWithId, SafeUser, UpdatableUser};
 
 use crate::{
     schema::users,

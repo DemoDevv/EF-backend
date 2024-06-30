@@ -1,4 +1,7 @@
+use once_cell::sync::Lazy;
+
 pub mod config;
 pub mod errors;
-pub mod extractors;
-pub mod types;
+pub mod parse;
+
+pub const CONFIG: Lazy<config::Config> = Lazy::new(|| config::Config::init());

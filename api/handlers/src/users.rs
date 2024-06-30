@@ -3,10 +3,7 @@ use actix_web_httpauth::middleware::HttpAuthentication;
 
 use api_db::{models::user::User, repository::UserRepository, update::Updatable};
 use api_services::auth::middleware::validator;
-use shared::{
-    extractors::user_extractor::{UpdatableUser, UserPayload},
-    types::user::{NewUserWithId, SafeUser},
-};
+use api_types::user::{NewUserWithId, SafeUser, UpdatableUser, UserPayload};
 
 pub fn service<R: UserRepository>(cfg: &mut web::ServiceConfig) {
     cfg.service(

@@ -1,14 +1,12 @@
 use actix_web::{http::StatusCode, web, App};
 use api_handlers::health;
 
-use once_cell::sync::Lazy;
-
-const CONFIG: Lazy<shared::config::Config> = Lazy::new(|| shared::config::Config::init());
+mod common;
 
 #[actix_web::test]
 async fn test_health_get() {
     let app = App::new()
-        .app_data(web::Data::new(CONFIG.clone()))
+        .app_data(web::Data::new(common::CONFIG.clone()))
         .configure(health::service);
     let app = actix_web::test::init_service(app).await;
 

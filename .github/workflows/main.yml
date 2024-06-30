@@ -2,26 +2,28 @@ name: EF-Backend tests
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
-   
+    branches: ["master"]
+
 env:
   CARGO_TERM_COLOR: always
 
   DEVELOPMENT: true
-  VERSION: 0.0.3
+  VERSION: 0.0.7
+  AUTH_DRIVER: session
   DATABASE_URL: postgres://user:password@localhost/mydatabase
   REDIS_URL: redis://user@localhost:6379
   REDIS_USERNAME: user
   REDIS_PASSWORD: ""
   REDIS_PORT: 6379
   REDIS_HOST: 127.0.0.1
-      
+
   JWT_SECRET: test
   JWT_EXPIRED_IN: 5
 
   REFRESH_TOKEN_TTL: 60
+  SESSION_TTL: 60
 
 jobs:
   build:
@@ -45,29 +47,29 @@ jobs:
         options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up cargo cache
-      uses: actions/cache@v3
-      continue-on-error: false
-      with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/            
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: ${{ runner.os }}-cargo-
+      - name: Set up cargo cache
+        uses: actions/cache@v3
+        continue-on-error: false
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
 
-    - name: Install diesel_cli
-      run: cargo install diesel_cli --locked --no-default-features --features "postgres" || true
+      - name: Install diesel_cli
+        run: cargo install diesel_cli --locked --no-default-features --features "postgres" || true
 
-    - name: Run database migrations
-      run: diesel migration run
+      - name: Run database migrations
+        run: diesel migration run
 
-    - name: Build
-      run: cargo build --verbose
+      - name: Build
+        run: cargo build --verbose
 
-    - name: Test
-      run: cargo test --verbose
+      - name: Test
+        run: cargo test --verbose
