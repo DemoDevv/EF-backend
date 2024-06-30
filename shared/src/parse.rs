@@ -2,6 +2,7 @@
 pub enum Error {
     /// Error for environment variable not in the set of choices
     InvalidEnvVar,
+    BadDefaultValue,
 }
 
 impl std::error::Error for Error {}
@@ -13,9 +14,31 @@ impl std::fmt::Display for Error {
 }
 
 /// Choices struct to constrain the value of an environment variable to a set of choices
-pub struct Choices<T>(Vec<T>);
+pub struct Choices<T> {
+    choices: Vec<T>,
+    has_default_choice: bool,
+    default_value: Option<T>,
+}
 
 impl<T: std::cmp::PartialEq> Choices<T> {
+    fn new(values: Vec<T>) -> Self {
+        Choices {
+            choices: values,
+            has_default_choice: false,
+            default_value: None,
+        }
+    }
+
+    pub fn default(&mut self, value: T) -> &Self {
+        if !self.choices.contains(&value) {
+            println!("La valeur par défaut de la variable d'environnement doit être présente dans les choix possibles.");
+            return self;
+        }
+        self.default_value = Some(value);
+        self.has_default_choice = true;
+        self
+    }
+
     /// parse the value of the environment variable
     /// throws an error if the value is not in the set of choices
     /// returns the value if it is in the set of choices
@@ -36,14 +59,26 @@ impl<T: std::cmp::PartialEq> Choices<T> {
     /// let value = choice.parse("d".to_string());
     /// assert!(value.is_err());
     /// ```
-    pub fn parse<P>(&self, value: P) -> Result<T, Error>
+    pub fn parse<P>(self, value: P) -> Result<T, Error>
     where
         P: Into<T>,
     {
-        let value_converted: T = value.try_into().map_err(|_| Error::InvalidEnvVar)?;
-        if !self.0.contains(&value_converted) {
+        let conversion = value.try_into();
+
+        if conversion.is_err() && !self.has_default_choice {
             return Err(Error::InvalidEnvVar);
         }
+
+        let value_converted: T = conversion.unwrap();
+
+        if !self.choices.contains(&value_converted) {
+            if !self.has_default_choice {
+                return Err(Error::InvalidEnvVar);
+            }
+
+            return Ok(self.default_value.unwrap());
+        }
+
         Ok(value_converted)
     }
 }
@@ -75,7 +110,7 @@ impl<T: std::cmp::PartialEq> Choices<T> {
 /// }
 /// ```
 pub fn choices(choices: Vec<&str>) -> Choices<String> {
-    Choices(choices.iter().map(|s| s.to_string()).collect())
+    Choices::new(choices.iter().map(|s| s.to_string()).collect())
 }
 
 /// use this function in your config struct when you want to constrain the value of an environment variable to a boolean
@@ -108,5 +143,5 @@ pub fn choices(choices: Vec<&str>) -> Choices<String> {
 /// }
 /// ```
 pub fn boolean() -> Choices<bool> {
-    Choices(vec![true, false])
+    Choices::new(vec![true, false])
 }
