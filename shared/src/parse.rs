@@ -2,7 +2,7 @@
 pub enum Error {
     /// Error for environment variable not in the set of choices
     InvalidEnvVar,
-    BadDefaultValue,
+    NoDefaultValue,
 }
 
 impl std::error::Error for Error {}
@@ -29,7 +29,7 @@ impl<T: std::cmp::PartialEq> Choices<T> {
         }
     }
 
-    pub fn default(&mut self, value: T) -> &Self {
+    pub fn default(mut self, value: T) -> Self {
         if !self.choices.contains(&value) {
             println!("La valeur par défaut de la variable d'environnement doit être présente dans les choix possibles.");
             return self;
@@ -73,7 +73,7 @@ impl<T: std::cmp::PartialEq> Choices<T> {
 
         if !self.choices.contains(&value_converted) {
             if !self.has_default_choice {
-                return Err(Error::InvalidEnvVar);
+                return Err(Error::NoDefaultValue);
             }
 
             return Ok(self.default_value.unwrap());
