@@ -23,6 +23,15 @@ impl RedisInfo {
 }
 
 #[derive(Clone)]
+pub struct OAuthInfo {
+    pub oauth_client_id: String,
+    pub oauth_client_secret: String,
+    pub oauth_redirect_url: String,
+    pub oauth_auth_url: String,
+    pub oauth_token_url: String,
+}
+
+#[derive(Clone)]
 pub struct Config {
     pub development: bool,
     pub version: String,
@@ -38,6 +47,8 @@ pub struct Config {
 
     pub refresh_token_ttl: i64,
     pub session_ttl: i64,
+
+    pub oauth_info: OAuthInfo,
 }
 
 impl Config {
@@ -45,6 +56,7 @@ impl Config {
         dotenv::dotenv().ok();
 
         let development = boolean()
+            .default(true)
             .parse::<bool>(
                 env::var("DEVELOPMENT")
                     .expect("DEVELOPMENT must be set")
@@ -76,6 +88,14 @@ impl Config {
 
         let session_ttl = env::var("SESSION_TTL").expect("SESSION_TTL must be set");
 
+        let oauth_info = OAuthInfo {
+            oauth_client_id: env::var("OAUTH_CLIENT_ID").expect("must be set"),
+            oauth_client_secret: env::var("OAUTH_CLIENT_SECRET").expect("must be set"),
+            oauth_redirect_url: env::var("OAUTH_REDIRECT_URL").expect("must be set"),
+            oauth_auth_url: env::var("OAUTH_AUTH_URL").expect("must be set"),
+            oauth_token_url: env::var("OAUTH_TOKEN_URL").expect("must be set"),
+        };
+
         Config {
             development,
             version,
@@ -86,6 +106,7 @@ impl Config {
             jwt_expired_in: jwt_expired_in.parse::<i64>().unwrap(),
             refresh_token_ttl: refresh_token_ttl.parse::<i64>().unwrap(),
             session_ttl: session_ttl.parse::<i64>().unwrap(),
+            oauth_info,
         }
     }
 }
