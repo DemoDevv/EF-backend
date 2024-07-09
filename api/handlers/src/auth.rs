@@ -1,20 +1,20 @@
 use actix_web::{web, Error, HttpResponse};
-use api_services::auth::types::Tokens;
-use api_services::redis::models::Session;
-use api_services::redis::services::generate_session_token;
+
 use argon2::PasswordHash;
 use validator::Validate;
-
-use api_services::auth::services::{create_valid_token, generate_refresh_token};
 
 use api_db::repository::UserRepository;
 use api_services::auth::errors::AuthentificationError;
 use api_services::auth::helpers::{hash_password, verify_password};
+use api_services::auth::services::{create_valid_token, generate_refresh_token};
+use api_services::auth::types::Tokens;
 use api_services::redis::{RedisClient, RedisRepository};
 use api_types::roles::Role;
 use api_types::user::{InputUser, NewUser, RefreshableUser};
 use shared::config::Config;
 use shared::errors::{ServiceError, ServiceErrorType};
+
+use crate::helpers::tokens::send_secure_tokens;
 
 pub fn service<R: UserRepository>(cfg: &mut web::ServiceConfig) {
     cfg.service(
@@ -37,12 +37,6 @@ pub async fn login<R: UserRepository>(
         error_type: ServiceErrorType::BadDeserialization,
     })?;
 
-    let generique_error = ServiceError {
-        // TODO: make this error in a const file
-        message: Some("Authentification failed".to_string()),
-        error_type: ServiceErrorType::BadAuthentification,
-    };
-
     let user = match repo.get_user_by_email(&user_json.email).await {
         Ok(user_from_the_db) => {
             // we parse the hash from the database
@@ -57,44 +51,27 @@ pub async fn login<R: UserRepository>(
             // we don't have error so we return the user
             Ok(user_from_the_db)
         }
-        Err(_) => Err(generique_error),
+        Err(_) => Err(ServiceError {
+            message: Some("Authentification failed".to_string()),
+            error_type: ServiceErrorType::BadAuthentification,
+        }),
     }?;
 
-    // handle the case of a jwt auth driver
-    if config.auth_driver.as_str() == "jwt" {
-        let tokens = Tokens {
-            access_token: create_valid_token(config.clone(), &user)?,
-            refresh_token: generate_refresh_token(),
-        };
-
-        redis_client
-            .update_ttl(
-                &tokens.refresh_token,
-                &user.id.to_string(),
-                config.refresh_token_ttl,
-            )
-            .await
-            .map_err(|err| ServiceError::from(err))?;
-
-        return Ok(HttpResponse::Ok().json(tokens));
-    }
-
-    // TODO: ajouter des barrières pour que un utilisateur ne puisse pas spam les routes d'auth
-    let token = generate_session_token();
-    let session = Session {
-        email: user.email.clone(),
-        role: user.role.clone(),
+    let tokens = Tokens {
+        access_token: create_valid_token(&config, &user)?,
+        refresh_token: generate_refresh_token(),
     };
+
     redis_client
         .update_ttl(
-            &token,
-            &serde_json::to_string(&session)?,
-            config.session_ttl,
+            &tokens.refresh_token,
+            &user.id.to_string(),
+            config.refresh_token_ttl,
         )
         .await
         .map_err(|err| ServiceError::from(err))?;
 
-    Ok(HttpResponse::Ok().json(token))
+    Ok(send_secure_tokens(tokens, &config))
 }
 
 pub async fn register<R: UserRepository>(
@@ -109,11 +86,10 @@ pub async fn register<R: UserRepository>(
         error_type: ServiceErrorType::BadDeserialization,
     })?;
 
-    // FIXME: timing attack possible
     let user = match repo.get_user_by_email(&user_json.email).await {
         Ok(_) => Err(ServiceError {
-            message: Some("User already exist".to_string()), // the message has to be more generic
-            error_type: ServiceErrorType::InternalServerError,
+            message: Some("Authentification failed".to_string()),
+            error_type: ServiceErrorType::BadAuthentification,
         }),
         // the error can be different of the not found error and in this case we don't want to create the user
         Err(e) => {
@@ -141,40 +117,26 @@ pub async fn register<R: UserRepository>(
         }
     }?;
 
-    // handle the case of a jwt auth driver
-    if config.auth_driver.as_str() == "jwt" {
-        let tokens = Tokens {
-            access_token: create_valid_token(config.clone(), &user)?,
-            refresh_token: generate_refresh_token(),
-        };
-
-        redis_client
-            .update_ttl(
-                &tokens.refresh_token,
-                &user.id.to_string(),
-                config.refresh_token_ttl,
-            )
-            .await
-            .map_err(|err| ServiceError::from(err))?;
-
-        return Ok(HttpResponse::Ok().json(tokens));
-    }
-
-    let token = generate_session_token();
-    let session = Session {
-        email: user.email.clone(),
-        role: user.role.clone(),
+    let tokens = Tokens {
+        access_token: create_valid_token(&config, &user)?,
+        refresh_token: generate_refresh_token(),
     };
+
     redis_client
         .update_ttl(
-            &token,
-            &serde_json::to_string(&session)?,
-            config.session_ttl,
+            &tokens.refresh_token,
+            &user.id.to_string(),
+            config.refresh_token_ttl,
         )
         .await
         .map_err(|err| ServiceError::from(err))?;
 
-    Ok(HttpResponse::Ok().json(token))
+    Ok(send_secure_tokens(tokens, &config))
+}
+
+pub async fn logout() -> Result<HttpResponse, Error> {
+    // Invalider le refresh token
+    Ok(HttpResponse::Ok().json("ok"))
 }
 
 pub async fn refresh_tokens<R: UserRepository>(
@@ -214,10 +176,11 @@ pub async fn refresh_tokens<R: UserRepository>(
     }
 
     let tokens = Tokens {
-        access_token: create_valid_token(config.clone(), &user_from_db)?,
+        access_token: create_valid_token(&config, &user_from_db)?,
         refresh_token: generate_refresh_token(),
     };
 
+    // make rotation of the refresh token and invalidate it
     redis_client
         .delete(&user.refresh_token)
         .await
@@ -231,5 +194,5 @@ pub async fn refresh_tokens<R: UserRepository>(
         .await
         .map_err(|err| ServiceError::from(err))?;
 
-    Ok(HttpResponse::Ok().json(tokens))
+    Ok(send_secure_tokens(tokens, &config))
 }
