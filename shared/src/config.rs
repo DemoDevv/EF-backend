@@ -43,10 +43,9 @@ pub struct Config {
     pub redis_info: RedisInfo,
 
     pub jwt_secret: String,
-    pub jwt_expired_in: i64,
+    pub jwt_expired_in: i64, // (15-30 minutes)
 
-    pub refresh_token_ttl: i64,
-    pub session_ttl: i64,
+    pub refresh_token_ttl: i64, // (7-14 jours)
 
     pub oauth_info: OAuthInfo,
 }
@@ -66,7 +65,7 @@ impl Config {
             .expect("DEVELOPMENT must be a boolean");
         let version = env::var("VERSION").expect("VERSION must be set");
 
-        let auth_driver = choices(vec!["session", "jwt", "oauth"])
+        let auth_driver = choices(vec!["jwt", "oauth"])
             .default("jwt".to_string())
             .parse(env::var("AUTH_DRIVER").expect("AUTH_DRIVER must be set"))
             .expect("AUTH_DRIVER must be in choices");
@@ -86,14 +85,14 @@ impl Config {
         let refresh_token_ttl =
             env::var("REFRESH_TOKEN_TTL").expect("REFRESH_TOKEN_TTL must be set");
 
-        let session_ttl = env::var("SESSION_TTL").expect("SESSION_TTL must be set");
-
         let oauth_info = OAuthInfo {
-            oauth_client_id: env::var("OAUTH_CLIENT_ID").expect("must be set"),
-            oauth_client_secret: env::var("OAUTH_CLIENT_SECRET").expect("must be set"),
-            oauth_redirect_url: env::var("OAUTH_REDIRECT_URL").expect("must be set"),
-            oauth_auth_url: env::var("OAUTH_AUTH_URL").expect("must be set"),
-            oauth_token_url: env::var("OAUTH_TOKEN_URL").expect("must be set"),
+            oauth_client_id: env::var("OAUTH_CLIENT_ID").expect("OAUTH_CLIENT_ID must be set"),
+            oauth_client_secret: env::var("OAUTH_CLIENT_SECRET")
+                .expect("OAUTH_CLIENT_SECRET must be set"),
+            oauth_redirect_url: env::var("OAUTH_REDIRECT_URL")
+                .expect("OAUTH_REDIRECT_URL must be set"),
+            oauth_auth_url: env::var("OAUTH_AUTH_URL").expect("OAUTH_AUTH_URL must be set"),
+            oauth_token_url: env::var("OAUTH_TOKEN_URL").expect("OAUTH_TOKEN_URL must be set"),
         };
 
         Config {
@@ -105,7 +104,6 @@ impl Config {
             jwt_secret,
             jwt_expired_in: jwt_expired_in.parse::<i64>().unwrap(),
             refresh_token_ttl: refresh_token_ttl.parse::<i64>().unwrap(),
-            session_ttl: session_ttl.parse::<i64>().unwrap(),
             oauth_info,
         }
     }
