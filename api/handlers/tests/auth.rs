@@ -12,11 +12,7 @@ use api_types::user::NewUser;
 
 mod common;
 
-async fn generate_good_user(
-    users_repository: &UsersRepository,
-    email: &str,
-    password: &str,
-) -> User {
+async fn insert_good_user(users_repository: &UsersRepository, email: &str, password: &str) -> User {
     let hash = api_services::auth::helpers::hash_password(password).unwrap();
 
     // Create a valid user
@@ -66,7 +62,7 @@ async fn test_login_with_good_credentials() {
 
     let email = "mathieulebras@gmail.com";
     let password = "good_password";
-    let valid_user = generate_good_user(&users_repository, email, password).await;
+    let valid_user = insert_good_user(&users_repository, email, password).await;
 
     let app = App::new()
         .app_data(web::Data::new(common::CONFIG.clone()))
@@ -97,7 +93,7 @@ async fn test_register_with_email_already_exist() {
 
     let email = "mathieulebras_exist@gmail.com";
     let password = "good_password";
-    let valid_user = generate_good_user(&users_repository, email, password).await;
+    let valid_user = insert_good_user(&users_repository, email, password).await;
 
     let app = App::new()
         .app_data(web::Data::new(common::CONFIG.clone()))
@@ -117,7 +113,7 @@ async fn test_register_with_email_already_exist() {
 
     users_repository.delete(valid_user.id).await.unwrap();
 
-    assert_eq!(resp.status(), StatusCode::INTERNAL_SERVER_ERROR);
+    assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
 }
 
 #[actix_web::test]
@@ -161,7 +157,7 @@ async fn test_refresh_tokens() {
     let email = "mathieulebras_refreshtest@gmail.com";
     let password = "good_password";
 
-    let valid_user = generate_good_user(&users_repository, email, password).await;
+    let valid_user = insert_good_user(&users_repository, email, password).await;
 
     let app = App::new()
         .app_data(web::Data::new(common::CONFIG_JWT.clone()))
