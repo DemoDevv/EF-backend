@@ -31,7 +31,7 @@ pub fn validate_token(
     }
 }
 
-pub fn create_valid_token(config: web::Data<Config>, user: &User) -> Result<String, ServiceError> {
+pub fn create_valid_token(config: &Config, user: &User) -> Result<String, ServiceError> {
     let iat = OffsetDateTime::now_utc();
     let exp = iat + Duration::minutes(config.jwt_expired_in);
 
@@ -71,5 +71,9 @@ pub fn generate_refresh_token() -> String {
     use rand::distributions::Alphanumeric;
     use rand::{thread_rng, Rng};
 
-    thread_rng().sample_iter(&Alphanumeric).take(32).map(char::from).collect()
+    thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(32)
+        .map(char::from)
+        .collect()
 }
