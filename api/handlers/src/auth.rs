@@ -3,7 +3,9 @@ use actix_web::{web, Error, HttpResponse};
 use argon2::PasswordHash;
 use validator::Validate;
 
+use api_configs::config::Config;
 use api_db::repository::UserRepository;
+use api_errors::{ServiceError, ServiceErrorType};
 use api_services::auth::errors::AuthentificationError;
 use api_services::auth::helpers::{hash_password, verify_password};
 use api_services::auth::services::{create_valid_token, generate_refresh_token};
@@ -11,8 +13,6 @@ use api_services::auth::types::Tokens;
 use api_services::redis::{RedisClient, RedisRepository};
 use api_types::roles::Role;
 use api_types::user::{InputUser, NewUser, RefreshableUser};
-use shared::config::Config;
-use shared::errors::{ServiceError, ServiceErrorType};
 
 use crate::helpers::tokens::send_secure_tokens;
 

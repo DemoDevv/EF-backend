@@ -2,9 +2,9 @@ use actix_web::{web, Error, HttpResponse};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use actix_web_httpauth::middleware::HttpAuthentication;
 
+use api_configs::config::Config;
 use api_services::auth::middleware::validator;
 use api_services::auth::services::decode_token;
-use shared::config::Config;
 
 pub fn service(cfg: &mut web::ServiceConfig) {
     cfg.service(

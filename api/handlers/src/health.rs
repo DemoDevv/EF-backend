@@ -1,6 +1,6 @@
 use actix_web::{web, Error, HttpResponse};
 
-use shared::config::Config;
+use api_configs::config::Config;
 
 pub fn service(cfg: &mut web::ServiceConfig) {
     cfg.service(web::resource("/status").route(web::get().to(status)));

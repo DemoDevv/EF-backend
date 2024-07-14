@@ -1,6 +1,6 @@
 use actix_web::{cookie::Cookie, HttpResponse};
+use api_configs::config::Config;
 use api_services::auth::types::Tokens;
-use shared::config::Config;
 
 pub(crate) fn send_secure_tokens(tokens: Tokens, config: &Config) -> HttpResponse {
     HttpResponse::Ok()
