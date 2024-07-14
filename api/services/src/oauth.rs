@@ -1,4 +1,4 @@
-use shared::config::Config;
+use api_configs::config::Config;
 
 use oauth2::{AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
 
