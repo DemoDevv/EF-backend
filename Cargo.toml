@@ -6,11 +6,10 @@
 [workspace]
 members = [ "api/configs",
     "api/db", "api/errors", "api/extractors",
-    "api/handlers", 
+    "api/handlers",
     "api/middlewares",
     "api/services", "api/types",
-    "bootstrap",
-    "shared"
+    "bootstrap"
 ]
 resolver = "2"
 
