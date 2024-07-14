@@ -1,16 +1,13 @@
 use actix_web::{dev::ServiceRequest, web};
+
 use jsonwebtoken::{
     decode, encode, Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation,
 };
-
 use time::{Duration, OffsetDateTime};
 
-use shared::{
-    config::Config,
-    errors::{ServiceError, ServiceErrorType},
-};
-
+use api_configs::config::Config;
 use api_db::models::user::User;
+use api_errors::{ServiceError, ServiceErrorType};
 
 use super::claims::TokenClaims;
 

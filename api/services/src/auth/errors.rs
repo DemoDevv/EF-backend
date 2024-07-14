@@ -1,4 +1,4 @@
-use shared::errors::ServiceError;
+use api_errors::ServiceError;
 
 #[derive(Debug)]
 pub enum AuthentificationError {
@@ -16,7 +16,7 @@ impl From<AuthentificationError> for ServiceError {
     fn from(_error: AuthentificationError) -> Self {
         ServiceError {
             message: Some("Authentification failed".to_string()),
-            error_type: shared::errors::ServiceErrorType::BadAuthentification,
+            error_type: api_errors::ServiceErrorType::BadAuthentification,
         }
     }
 }
