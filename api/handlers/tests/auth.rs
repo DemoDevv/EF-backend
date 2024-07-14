@@ -149,10 +149,9 @@ async fn test_register_with_email_not_already_exist() {
 
 #[actix_web::test]
 async fn test_refresh_tokens() {
-    let users_repository = UsersRepository::new(api_db::connection::establish_connection(
-        &common::CONFIG_JWT,
-    ));
-    let redis_client = api_services::redis::get_redis_client(&common::CONFIG_JWT);
+    let users_repository =
+        UsersRepository::new(api_db::connection::establish_connection(&common::CONFIG));
+    let redis_client = api_services::redis::get_redis_client(&common::CONFIG);
 
     let email = "mathieulebras_refreshtest@gmail.com";
     let password = "good_password";
@@ -160,7 +159,7 @@ async fn test_refresh_tokens() {
     let valid_user = insert_good_user(&users_repository, email, password).await;
 
     let app = App::new()
-        .app_data(web::Data::new(common::CONFIG_JWT.clone()))
+        .app_data(web::Data::new(common::CONFIG.clone()))
         .app_data(web::Data::new(users_repository.clone()))
         .app_data(web::Data::new(redis_client.clone()))
         .configure(auth::service::<UsersRepository>);
