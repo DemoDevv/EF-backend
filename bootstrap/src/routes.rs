@@ -8,6 +8,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
             .configure(api_handlers::health::service)
             .configure(api_handlers::auth::service::<UsersRepository>)
             .configure(api_handlers::secure::service)
-            .configure(api_handlers::users::service::<UsersRepository>),
+            .configure(api_handlers::users::service::<UsersRepository>)
+            .configure(api_handlers::oauth::service),
     );
 }
