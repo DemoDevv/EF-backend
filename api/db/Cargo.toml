@@ -13,5 +13,6 @@ serde = "1.0.193"
 actix-rt = "2.9.0"
 once_cell = "1.19.0"
 
-shared = { path = "../../shared" }
 api-types = { path = "../types" }
+api-errors = { path = "../errors"}
+api-configs = { path = "../configs" }

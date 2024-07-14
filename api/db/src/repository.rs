@@ -1,8 +1,7 @@
 use crate::models::user::User;
 use api_types::user::NewUser;
-use shared::errors;
 
-pub type RepositoryResult<T> = Result<T, errors::ServiceError>;
+pub type RepositoryResult<T> = Result<T, api_errors::ServiceError>;
 
 #[async_trait::async_trait]
 pub trait Repository<T, N>: Clone + Send + Sync + 'static {
