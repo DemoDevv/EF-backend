@@ -23,5 +23,7 @@ api-services = { path = "../services" }
 api-middlewares = { path = "../middlewares" }
 api-types = { path = "../types" }
 api-extractors = { path = "../extractors" }
+api-errors = { path = "../errors"}
+api-configs = { path = "../configs" }
 
-shared = { path = "../../shared" }
+oauth2 = "4.4.2"

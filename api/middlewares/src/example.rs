@@ -14,7 +14,7 @@ use futures_util::FutureExt;
 pub struct TestMiddlewareFactory;
 
 impl TestMiddlewareFactory {
-    pub fn new() -> Self {
+    pub fn _new() -> Self {
         TestMiddlewareFactory
     }
 }

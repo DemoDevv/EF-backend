@@ -3,8 +3,8 @@ use diesel::prelude::*;
 use crate::connection::Pool;
 use crate::models::user::{InsertableUser, User};
 use crate::schema::users;
+use api_errors::ServiceError;
 use api_types::user::NewUser;
-use shared::errors::ServiceError;
 
 use crate::repository::{Repository, RepositoryResult, UserRepository};
 
@@ -27,11 +27,11 @@ impl Repository<User, NewUser> for UsersRepository {
             .select(User::as_select())
             .first(&mut self.conn.get().map_err(|_| ServiceError {
                 message: Some("Error for getting connection to the database".to_string()),
-                error_type: shared::errors::ServiceErrorType::DatabaseError,
+                error_type: api_errors::ServiceErrorType::DatabaseError,
             })?)
             .map_err(|_| ServiceError {
                 message: Some("Error getting user".to_string()),
-                error_type: shared::errors::ServiceErrorType::InternalServerError,
+                error_type: api_errors::ServiceErrorType::InternalServerError,
             })
     }
 
@@ -40,11 +40,11 @@ impl Repository<User, NewUser> for UsersRepository {
             .select(User::as_select())
             .load(&mut self.conn.get().map_err(|_| ServiceError {
                 message: Some("Error for getting connection to the database".to_string()),
-                error_type: shared::errors::ServiceErrorType::DatabaseError,
+                error_type: api_errors::ServiceErrorType::DatabaseError,
             })?)
             .map_err(|_| ServiceError {
                 message: Some("Error getting all users".to_string()),
-                error_type: shared::errors::ServiceErrorType::InternalServerError,
+                error_type: api_errors::ServiceErrorType::InternalServerError,
             })
     }
 
@@ -63,11 +63,11 @@ impl Repository<User, NewUser> for UsersRepository {
             .returning(User::as_returning())
             .get_result(&mut self.conn.get().map_err(|_| ServiceError {
                 message: Some("Error for getting connection to the database".to_string()),
-                error_type: shared::errors::ServiceErrorType::DatabaseError,
+                error_type: api_errors::ServiceErrorType::DatabaseError,
             })?)
             .map_err(|_| ServiceError {
                 message: Some("Error saving new user".to_string()),
-                error_type: shared::errors::ServiceErrorType::InternalServerError,
+                error_type: api_errors::ServiceErrorType::InternalServerError,
             })
     }
 
@@ -78,11 +78,11 @@ impl Repository<User, NewUser> for UsersRepository {
             .returning(User::as_returning())
             .get_result(&mut self.conn.get().map_err(|_| ServiceError {
                 message: Some("Error for getting connection to the database".to_string()),
-                error_type: shared::errors::ServiceErrorType::DatabaseError,
+                error_type: api_errors::ServiceErrorType::DatabaseError,
             })?)
             .map_err(|_| ServiceError {
                 message: Some("Error updating user".to_string()),
-                error_type: shared::errors::ServiceErrorType::InternalServerError,
+                error_type: api_errors::ServiceErrorType::InternalServerError,
             })
     }
 
@@ -90,11 +90,11 @@ impl Repository<User, NewUser> for UsersRepository {
         diesel::delete(users::table.filter(users::id.eq(id)))
             .execute(&mut self.conn.get().map_err(|_| ServiceError {
                 message: Some("Error for getting connection to the database".to_string()),
-                error_type: shared::errors::ServiceErrorType::DatabaseError,
+                error_type: api_errors::ServiceErrorType::DatabaseError,
             })?)
             .map_err(|_| ServiceError {
                 message: Some("Error deleting user".to_string()),
-                error_type: shared::errors::ServiceErrorType::InternalServerError,
+                error_type: api_errors::ServiceErrorType::InternalServerError,
             })
     }
 }
@@ -107,11 +107,11 @@ impl UserRepository for UsersRepository {
             .select(User::as_select())
             .first(&mut self.conn.get().map_err(|_| ServiceError {
                 message: Some("Error for getting connection to the database".to_string()),
-                error_type: shared::errors::ServiceErrorType::DatabaseError,
+                error_type: api_errors::ServiceErrorType::DatabaseError,
             })?)
             .map_err(|_| ServiceError {
                 message: Some("Error getting user".to_string()),
-                error_type: shared::errors::ServiceErrorType::InternalServerError,
+                error_type: api_errors::ServiceErrorType::InternalServerError,
             })
     }
 
@@ -119,11 +119,11 @@ impl UserRepository for UsersRepository {
         diesel::delete(users::table.filter(users::email.eq(email)))
             .execute(&mut self.conn.get().map_err(|_| ServiceError {
                 message: Some("Error for getting connection to the database".to_string()),
-                error_type: shared::errors::ServiceErrorType::DatabaseError,
+                error_type: api_errors::ServiceErrorType::DatabaseError,
             })?)
             .map_err(|_| ServiceError {
                 message: Some("Error deleting user".to_string()),
-                error_type: shared::errors::ServiceErrorType::InternalServerError,
+                error_type: api_errors::ServiceErrorType::InternalServerError,
             })
     }
 }
@@ -134,7 +134,8 @@ mod tests {
     use once_cell::sync::Lazy;
 
     #[allow(dead_code)] // bug pas important avec l'éditeur
-    const CONFIG: Lazy<shared::config::Config> = Lazy::new(|| shared::config::Config::init());
+    const CONFIG: Lazy<api_configs::config::Config> =
+        Lazy::new(|| api_configs::config::Config::init());
     #[allow(dead_code)] // bug pas important avec l'éditeur
     const USER_REPOSITORY: Lazy<UsersRepository> =
         Lazy::new(|| UsersRepository::new(crate::connection::establish_connection(&CONFIG)));

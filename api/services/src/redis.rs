@@ -1,10 +1,6 @@
-use shared::config::Config;
+use api_configs::config::Config;
 
 extern crate redis;
-
-pub mod errors;
-pub mod models;
-pub mod services;
 
 // type initialization
 type RedisServiceResult<T> = Result<T, redis::RedisError>; // todo: move to serviceError
@@ -84,7 +80,8 @@ mod tests {
     use once_cell::sync::Lazy;
 
     #[allow(dead_code)] // bug pas important avec l'éditeur
-    const CONFIG: Lazy<shared::config::Config> = Lazy::new(|| shared::config::Config::init());
+    const CONFIG: Lazy<api_configs::config::Config> =
+        Lazy::new(|| api_configs::config::Config::init());
     #[allow(dead_code)] // bug pas important avec l'éditeur
     const CLIENT: Lazy<RedisClient> = Lazy::new(|| get_redis_client(&CONFIG.clone()));
 

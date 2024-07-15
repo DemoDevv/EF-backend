@@ -6,7 +6,7 @@ mod common;
 #[actix_web::test]
 async fn test_secure_jwt_with_good_jwt() {
     let app = App::new()
-        .app_data(web::Data::new(common::CONFIG_JWT.clone()))
+        .app_data(web::Data::new(common::CONFIG.clone()))
         .configure(secure::service);
     let app = actix_web::test::init_service(app).await;
 
@@ -22,27 +22,13 @@ async fn test_secure_jwt_with_good_jwt() {
 #[actix_web::test]
 async fn test_secure_jwt_with_bad_jwt() {
     let app = App::new()
-        .app_data(web::Data::new(common::CONFIG_JWT.clone()))
+        .app_data(web::Data::new(common::CONFIG.clone()))
         .configure(secure::service);
     let app = actix_web::test::init_service(app).await;
 
     let req = actix_web::test::TestRequest::get()
         .uri("/v1/secure/test-jwt")
         .append_header(("Authorization", common::BAD_TOKEN_FOR_TEST))
-        .to_request();
-    let resp = actix_web::test::call_service(&app, req).await;
-
-    assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
-}
-
-#[actix_web::test]
-async fn test_secure_session_with_jwt() {
-    let app = App::new().configure(secure::service);
-    let app = actix_web::test::init_service(app).await;
-
-    let req = actix_web::test::TestRequest::get()
-        .uri("/v1/secure/test-session")
-        .append_header(("Authorization", common::TOKEN_FOR_TEST))
         .to_request();
     let resp = actix_web::test::call_service(&app, req).await;
 

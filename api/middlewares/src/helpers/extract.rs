@@ -17,7 +17,7 @@ pub(crate) struct Extract<T> {
 }
 
 impl<T> Extract<T> {
-    pub fn new(req: ServiceRequest) -> Self {
+    pub fn _new(req: ServiceRequest) -> Self {
         Extract {
             req: Some(req),
             fut: None,
