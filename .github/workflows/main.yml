@@ -11,7 +11,7 @@ env:
 
   DEVELOPMENT: true
   VERSION: 0.0.7
-  AUTH_DRIVER: session
+  AUTH_DRIVER: jwt
   DATABASE_URL: postgres://user:password@localhost/mydatabase
   REDIS_URL: redis://user@localhost:6379
   REDIS_USERNAME: user
@@ -23,7 +23,12 @@ env:
   JWT_EXPIRED_IN: 5
 
   REFRESH_TOKEN_TTL: 60
-  SESSION_TTL: 60
+
+  OAUTH_CLIENT_ID: id
+  OAUTH_CLIENT_SECRET: secret
+  OAUTH_REDIRECT_URL: http://localhost:8080/api/v1/oauth/google/oauth2callback
+  OAUTH_AUTH_URL: https://accounts.google.com/o/oauth2/v2/auth
+  OAUTH_TOKEN_URL: https://oauth2.googleapis.com/token
 
 jobs:
   build:
