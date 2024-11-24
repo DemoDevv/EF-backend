@@ -4,16 +4,19 @@ use std::fmt;
 
 use actix_web::{http::StatusCode, HttpResponse, ResponseError};
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum ServiceErrorType {
     BadAuthentification,
     InternalServerError,
     BadDeserialization,
     DatabaseError,
     UnAuthorized,
+    UnprocessableEntityError,
+    Conflict,
+    NotFound,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct ServiceError {
     pub message: Option<String>,
     pub error_type: ServiceErrorType,
@@ -42,6 +45,9 @@ impl ResponseError for ServiceError {
             ServiceErrorType::BadDeserialization => StatusCode::BAD_REQUEST,
             ServiceErrorType::DatabaseError => StatusCode::INTERNAL_SERVER_ERROR,
             ServiceErrorType::UnAuthorized => StatusCode::UNAUTHORIZED,
+            ServiceErrorType::UnprocessableEntityError => StatusCode::UNPROCESSABLE_ENTITY,
+            ServiceErrorType::Conflict => StatusCode::CONFLICT,
+            ServiceErrorType::NotFound => StatusCode::NOT_FOUND,
         }
     }
 
@@ -55,6 +61,15 @@ impl From<redis::RedisError> for ServiceError {
         ServiceError {
             message: Some("Redis error".to_string()),
             error_type: ServiceErrorType::DatabaseError,
+        }
+    }
+}
+
+impl From<reqwest::Error> for ServiceError {
+    fn from(_error: reqwest::Error) -> Self {
+        ServiceError {
+            message: Some("Reqwest error".to_string()),
+            error_type: ServiceErrorType::InternalServerError,
         }
     }
 }
