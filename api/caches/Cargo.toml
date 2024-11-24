@@ -1,0 +1,16 @@
+[package]
+name = "api-caches"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+async-trait = { workspace = true }
+once_cell = { workspace = true }
+actix-rt = { workspace = true }
+
+api-configs = { path = "../configs" }
+api-errors = { path = "../errors" }
+
+[dependencies.redis]
+version = "*"
+features = ["aio", "tokio-comp"]
