@@ -1,0 +1,12 @@
+[package]
+name = "api-jobs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+uuid = { workspace = true }
+tokio-cron-scheduler = { version = "*", features = ["signal"] }
+
+api-services = { path = "../services" }
+api-caches = { path = "../caches" }
+api-db = { path = "../db" }
