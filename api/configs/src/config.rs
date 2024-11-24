@@ -39,6 +39,7 @@ pub struct Config {
     pub auth_driver: String,
 
     pub database_url: String,
+    pub database_test_url: String,
 
     pub redis_info: RedisInfo,
 
@@ -71,6 +72,8 @@ impl Config {
             .expect("AUTH_DRIVER must be in choices");
 
         let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+        let database_test_url =
+            env::var("DATABASE_TEST_URL").expect("DATABASE_TEST_URL must be set");
 
         let redis_info = RedisInfo {
             host: env::var("REDIS_HOST").expect("REDIS_HOST must be set"),
@@ -100,6 +103,7 @@ impl Config {
             version,
             auth_driver,
             database_url,
+            database_test_url,
             redis_info,
             jwt_secret,
             jwt_expired_in: jwt_expired_in.parse::<i64>().unwrap(),
