@@ -3,11 +3,12 @@
 diesel::table! {
     users (id) {
         id -> Int4,
-        first_name -> Text,
-        last_name -> Text,
+        pseudo -> Text,
+        first_name -> Nullable<Text>,
+        last_name -> Nullable<Text>,
         email -> Text,
-        password -> Text,
+        google_id -> Nullable<Text>,
+        password -> Nullable<Text>,
         created_at -> Timestamp,
-        role -> Text,
     }
 }

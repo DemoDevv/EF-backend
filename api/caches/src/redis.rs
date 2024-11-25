@@ -1,64 +1,79 @@
+use std::sync::Arc;
+
 use api_configs::config::Config;
 
 extern crate redis;
 
 // type initialization
-type RedisServiceResult<T> = Result<T, redis::RedisError>; // todo: move to serviceError
-pub type RedisClient = redis::Client;
+pub type RedisRepositoryResult<T> = Result<T, api_errors::ServiceError>;
+pub type RedisClient = Arc<redis::Client>;
 
 // public function to get a redis client
 pub fn get_redis_client(config: &Config) -> RedisClient {
-    redis::Client::open(config.redis_info.get_url()).unwrap()
+    Arc::new(redis::Client::open(config.redis_info.get_url()).unwrap())
 }
 
 #[async_trait::async_trait]
 pub trait RedisRepository: Clone + Send + Sync + 'static {
-    async fn ping(&self) -> RedisServiceResult<Option<String>>;
-    async fn get(&self, key: &str) -> RedisServiceResult<Option<String>>;
-    async fn set(&self, key: &str, value: &str) -> RedisServiceResult<()>;
-    async fn ttl(&self, key: &str) -> RedisServiceResult<i64>;
-    async fn update(&self, key: &str, value: &str) -> RedisServiceResult<()>;
-    async fn update_ttl(&self, key: &str, value: &str, ttl: i64) -> RedisServiceResult<()>;
-    async fn delete(&self, key: &str) -> RedisServiceResult<()>;
+    async fn ping(&self) -> RedisRepositoryResult<Option<String>>;
+    async fn get(&self, key: &str) -> RedisRepositoryResult<Option<String>>;
+    async fn set(&self, key: &str, value: &str) -> RedisRepositoryResult<()>;
+    async fn ttl(&self, key: &str) -> RedisRepositoryResult<i64>;
+    async fn update(&self, key: &str, value: &str) -> RedisRepositoryResult<()>;
+    async fn update_ttl(&self, key: &str, value: &str, ttl: i64) -> RedisRepositoryResult<()>;
+    async fn delete(&self, key: &str) -> RedisRepositoryResult<()>;
 }
 
 #[async_trait::async_trait]
 impl RedisRepository for RedisClient {
-    async fn ping(&self) -> RedisServiceResult<Option<String>> {
-        let mut con: redis::aio::Connection = self.get_async_connection().await?;
-        redis::cmd("PING").query_async(&mut con).await
+    async fn ping(&self) -> RedisRepositoryResult<Option<String>> {
+        let mut con = self.get_multiplexed_async_connection().await?;
+        redis::cmd("PING")
+            .query_async(&mut con)
+            .await
+            .map_err(|e| e.into())
     }
 
-    async fn get(&self, key: &str) -> RedisServiceResult<Option<String>> {
-        let mut con: redis::aio::Connection = self.get_async_connection().await?;
-        redis::cmd("GET").arg(key).query_async(&mut con).await
+    async fn get(&self, key: &str) -> RedisRepositoryResult<Option<String>> {
+        let mut con = self.get_multiplexed_async_connection().await?;
+        redis::cmd("GET")
+            .arg(key)
+            .query_async(&mut con)
+            .await
+            .map_err(|e| e.into())
     }
 
-    async fn set(&self, key: &str, value: &str) -> RedisServiceResult<()> {
-        let mut con: redis::aio::Connection = self.get_async_connection().await?;
+    async fn set(&self, key: &str, value: &str) -> RedisRepositoryResult<()> {
+        let mut con = self.get_multiplexed_async_connection().await?;
         redis::cmd("SET")
             .arg(key)
             .arg(value)
             .query_async(&mut con)
             .await
+            .map_err(|e| e.into())
     }
 
-    async fn ttl(&self, key: &str) -> RedisServiceResult<i64> {
-        let mut con: redis::aio::Connection = self.get_async_connection().await?;
-        redis::cmd("TTL").arg(key).query_async(&mut con).await
+    async fn ttl(&self, key: &str) -> RedisRepositoryResult<i64> {
+        let mut con = self.get_multiplexed_async_connection().await?;
+        redis::cmd("TTL")
+            .arg(key)
+            .query_async(&mut con)
+            .await
+            .map_err(|e| e.into())
     }
 
-    async fn update(&self, key: &str, value: &str) -> RedisServiceResult<()> {
-        let mut con: redis::aio::Connection = self.get_async_connection().await?;
+    async fn update(&self, key: &str, value: &str) -> RedisRepositoryResult<()> {
+        let mut con = self.get_multiplexed_async_connection().await?;
         redis::cmd("SET")
             .arg(key)
             .arg(value)
             .query_async(&mut con)
             .await
+            .map_err(|e| e.into())
     }
 
-    async fn update_ttl(&self, key: &str, value: &str, ttl: i64) -> RedisServiceResult<()> {
-        let mut con: redis::aio::Connection = self.get_async_connection().await?;
+    async fn update_ttl(&self, key: &str, value: &str, ttl: i64) -> RedisRepositoryResult<()> {
+        let mut con = self.get_multiplexed_async_connection().await?;
         redis::cmd("SET")
             .arg(key)
             .arg(value)
@@ -66,11 +81,16 @@ impl RedisRepository for RedisClient {
             .arg(ttl)
             .query_async(&mut con)
             .await
+            .map_err(|e| e.into())
     }
 
-    async fn delete(&self, key: &str) -> RedisServiceResult<()> {
-        let mut con: redis::aio::Connection = self.get_async_connection().await?;
-        redis::cmd("DEL").arg(key).query_async(&mut con).await
+    async fn delete(&self, key: &str) -> RedisRepositoryResult<()> {
+        let mut con = self.get_multiplexed_async_connection().await?;
+        redis::cmd("DEL")
+            .arg(key)
+            .query_async(&mut con)
+            .await
+            .map_err(|e| e.into())
     }
 }
 

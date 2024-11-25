@@ -6,10 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-actix-web = "4.4.0"
-futures-util = "0.3.30"
-actix-web-httpauth = "0.8.1"
+actix-web = { workspace = true }
+futures-util = { workspace = true }
+actix-web-httpauth = { workspace = true }
+futures-core = "0.3.30"
+serde_json = { workspace = true }
 
 api-services = { path = "../services" }
-futures-core = "0.3.30"
-serde_json = "1.0.117"
+api-caches = { path = "../caches" }
+api-errors = { path = "../errors" }

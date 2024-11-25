@@ -3,19 +3,17 @@ use time::OffsetDateTime;
 
 #[derive(Deserialize, Serialize)]
 pub struct TokenClaims {
-    pub sub: String,
+    pub sub: i32,
 
     #[serde(with = "jwt_numeric_date")]
     pub iat: OffsetDateTime,
 
     #[serde(with = "jwt_numeric_date")]
     pub exp: OffsetDateTime,
-
-    pub role: String,
 }
 
 impl TokenClaims {
-    pub fn new(sub: String, iat: OffsetDateTime, exp: OffsetDateTime, role: String) -> Self {
+    pub fn new(sub: i32, iat: OffsetDateTime, exp: OffsetDateTime) -> Self {
         // normalize the timestamps by stripping of microseconds
         let iat = iat
             .date()
@@ -28,12 +26,7 @@ impl TokenClaims {
             .unwrap()
             .assume_utc();
 
-        Self {
-            sub,
-            iat,
-            exp,
-            role,
-        }
+        Self { sub, iat, exp }
     }
 }
 

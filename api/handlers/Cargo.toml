@@ -6,24 +6,26 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-actix-web = "4.4.0"
-validator = { version = "0.16", features = ["derive"] }
+actix-web = { workspace = true }
+validator = { workspace = true }
 argon2 = "0.5.3"
-diesel = { version = "2.1.4", features = ["postgres", "chrono", "r2d2"] }
-chrono = { version = "0.4.31", features = ["serde"] }
-serde = "1.0.193"
+diesel = { workspace = true }
+chrono = { workspace = true }
+serde = { workspace = true }
 actix-web-httpauth = "0.8.1"
 async-trait = "0.1.77"
 futures-util = "0.3.30"
 serde_json = "1.0.114"
-once_cell = "1.19.0"
+once_cell = { workspace = true }
+uuid = { workspace = true }
 
 api-db = { path = "../db" }
 api-services = { path = "../services" }
 api-middlewares = { path = "../middlewares" }
 api-types = { path = "../types" }
 api-extractors = { path = "../extractors" }
-api-errors = { path = "../errors"}
+api-errors = { path = "../errors" }
 api-configs = { path = "../configs" }
+api-caches = { path = "../caches" }
 
 oauth2 = "4.4.2"

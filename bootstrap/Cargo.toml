@@ -7,11 +7,14 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4.4.0"
+oauth2 = "4.4.2"
+actix-cors = "0.7.0"
+env_logger = "0.11.3"
 
 api-handlers = { path = "../api/handlers" }
 api-services = { path = "../api/services" }
-api-errors = { path = "../api/errors"}
+api-errors = { path = "../api/errors" }
 api-db = { path = "../api/db" }
 api-configs = { path = "../api/configs" }
-oauth2 = "4.4.2"
-env_logger = "0.11.3"
+api-caches = { path = "../api/caches" }
+api-jobs = { path = "../api/jobs" }

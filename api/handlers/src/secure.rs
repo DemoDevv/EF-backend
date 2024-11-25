@@ -17,8 +17,8 @@ pub fn service(cfg: &mut web::ServiceConfig) {
 }
 
 pub async fn test(config: web::Data<Config>, token: BearerAuth) -> Result<HttpResponse, Error> {
-    // j'unwrap car je sais que le token est valide étant donné que j'ai passé le middleware
+    // we can unwrap here because the token is already validated
     let claims = decode_token(config, token.token()).unwrap().claims;
 
-    Ok(HttpResponse::Ok().json("good token, you have the role: ".to_string() + &claims.role))
+    Ok(HttpResponse::Ok().into())
 }
