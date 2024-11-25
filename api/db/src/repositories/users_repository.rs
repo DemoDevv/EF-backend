@@ -50,12 +50,12 @@ impl Repository<User, NewUser> for UsersRepository {
 
     async fn create(&self, item: &NewUser) -> RepositoryResult<User> {
         let insertable_user = InsertableUser {
-            first_name: &item.first_name,
-            last_name: &item.last_name,
+            pseudo: &item.pseudo,
+            first_name: item.first_name.as_deref(),
+            last_name: item.last_name.as_deref(),
             email: &item.email,
-            created_at: chrono::Local::now().naive_local(),
-            password: &item.password,
-            role: &item.role,
+            password: item.password.as_deref(),
+            google_id: item.google_id.as_deref(),
         };
 
         diesel::insert_into(users::table)
@@ -65,8 +65,8 @@ impl Repository<User, NewUser> for UsersRepository {
                 message: Some("Error for getting connection to the database".to_string()),
                 error_type: api_errors::ServiceErrorType::DatabaseError,
             })?)
-            .map_err(|_| ServiceError {
-                message: Some("Error saving new user".to_string()),
+            .map_err(|err| ServiceError {
+                message: Some(err.to_string()),
                 error_type: api_errors::ServiceErrorType::InternalServerError,
             })
     }
@@ -126,52 +126,72 @@ impl UserRepository for UsersRepository {
                 error_type: api_errors::ServiceErrorType::InternalServerError,
             })
     }
+
+    async fn get_user_by_google_id(&self, google_id: &str) -> RepositoryResult<User> {
+        users::table
+            .filter(users::google_id.eq(google_id))
+            .select(User::as_select())
+            .first(&mut self.conn.get().map_err(|_| ServiceError {
+                message: Some("Error for getting connection to the database".to_string()),
+                error_type: api_errors::ServiceErrorType::DatabaseError,
+            })?)
+            .map_err(|_| ServiceError {
+                message: Some("Error getting user".to_string()),
+                error_type: api_errors::ServiceErrorType::InternalServerError,
+            })
+    }
 }
 
 mod tests {
-    #[allow(unused_imports)] // bug pas important avec l'éditeur
+    #[allow(unused_imports)]
     use super::*;
     use once_cell::sync::Lazy;
 
-    #[allow(dead_code)] // bug pas important avec l'éditeur
+    #[allow(dead_code)]
     const CONFIG: Lazy<api_configs::config::Config> =
         Lazy::new(|| api_configs::config::Config::init());
-    #[allow(dead_code)] // bug pas important avec l'éditeur
-    const USER_REPOSITORY: Lazy<UsersRepository> =
-        Lazy::new(|| UsersRepository::new(crate::connection::establish_connection(&CONFIG)));
-
-    #[allow(dead_code)] // bug pas important avec l'éditeur
-    const GOOD_EMAIL: &str = "goodemailrepo@test.com";
-    #[allow(dead_code)] // bug pas important avec l'éditeur
-    const GOOD_PASSWORD: &str = "password";
-
-    #[allow(dead_code)] // bug pas important avec l'éditeur
-    async fn generate_good_user(users_repository: &UsersRepository) -> User {
-        users_repository
-            .create(&NewUser {
-                first_name: "Jhon".to_string(),
-                last_name: "Doe".to_string(),
-                email: GOOD_EMAIL.to_string(),
-                created_at: chrono::Local::now().naive_local(),
-                password: GOOD_PASSWORD.to_string(),
-                role: api_types::roles::Role::User.to_string(),
-            })
-            .await
-            .unwrap()
-    }
 
     #[actix_rt::test]
     async fn test_update_user() {
-        let user = generate_good_user(&USER_REPOSITORY).await;
+        let user_repository =
+            UsersRepository::new(crate::connection::establish_testing_connection(&CONFIG));
 
-        let mut cloned_user = user.clone();
-        cloned_user.first_name = "Jane".to_string();
+        // can result in an error if the auto increment of diesel is lower than the number of users seed manually.
+        // you just have to run tests more than the number of users in the seed script
+        let user = user_repository
+            .create(&NewUser {
+                pseudo: "pseudo".to_string(),
+                first_name: Some("Jhon".to_string()),
+                last_name: Some("Doe".to_string()),
+                email: "emaildetest@test.com".to_string(),
+                password: Some("password".to_string()),
+                google_id: None,
+            })
+            .await;
 
-        let updated_user = USER_REPOSITORY.update(user.id, &cloned_user).await;
+        assert!(user.is_ok());
+
+        let mut cloned_user = user.unwrap().clone();
+        cloned_user.first_name = Some("Jane".to_string());
+
+        let updated_user = user_repository.update(cloned_user.id, &cloned_user).await;
         assert_eq!(updated_user.is_ok(), true);
 
-        USER_REPOSITORY.delete(user.id).await.unwrap();
+        assert_eq!(updated_user.unwrap().first_name, Some("Jane".to_string()));
+    }
 
-        assert_eq!(updated_user.unwrap().first_name, "Jane".to_string());
+    #[actix_rt::test]
+    async fn test_get_first_user_in_channel() {
+        let pool = crate::connection::establish_testing_connection(&CONFIG);
+
+        // set in the seed script
+        let channel_id = 9992;
+
+        let user_repository = UsersRepository::new(pool);
+
+        let user = user_repository.get_first_user_in_channel(channel_id).await;
+
+        assert!(user.is_ok());
+        assert!(user.unwrap().id > 0);
     }
 }

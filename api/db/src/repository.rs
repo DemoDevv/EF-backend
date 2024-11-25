@@ -18,4 +18,5 @@ pub trait UserRepository: Clone + Send + Sync + 'static + Repository<User, NewUs
     // methods specific to the users repository
     async fn get_user_by_email(&self, email: &str) -> RepositoryResult<User>;
     async fn delete_user_by_email(&self, email: &str) -> RepositoryResult<usize>;
+    async fn get_user_by_google_id(&self, google_id: &str) -> RepositoryResult<User>;
 }

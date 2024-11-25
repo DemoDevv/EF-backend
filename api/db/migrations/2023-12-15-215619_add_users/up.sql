@@ -1,9 +1,11 @@
 CREATE TABLE users (
   id SERIAL NOT NULL PRIMARY KEY,
-  first_name TEXT NOT NULL,
-  last_name TEXT NOT NULL,
+  pseudo TEXT NOT NULL UNIQUE,
+  first_name TEXT,
+  last_name TEXT,
   email TEXT NOT NULL,
-  password TEXT NOT NULL,
-  created_at TIMESTAMP NOT NULL,
-  role TEXT NOT NULL
+  google_id TEXT,
+  password TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  -- add updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
