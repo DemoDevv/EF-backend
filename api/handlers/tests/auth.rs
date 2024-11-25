@@ -1,45 +1,32 @@
+use std::sync::Arc;
+
 use actix_web::{http::StatusCode, web, App};
 
-use api_db::models::user::User;
+use api_caches::{access_refresh_tokens::AccessRefreshTokensCacheRedis, redis::RedisRepository};
 use api_db::repositories::users_repository::UsersRepository;
 use api_handlers::auth;
-
-use api_db::repository::{Repository, UserRepository};
-use api_services::auth::types::Tokens;
-use api_services::redis::RedisRepository;
-use api_types::roles::Role;
-use api_types::user::NewUser;
+use api_services::auth::{services::AuthService, types::Tokens};
 
 mod common;
 
-async fn insert_good_user(users_repository: &UsersRepository, email: &str, password: &str) -> User {
-    let hash = api_services::auth::helpers::hash_password(password).unwrap();
-
-    // Create a valid user
-    users_repository
-        .create(&NewUser {
-            first_name: "Jhon".to_string(),
-            last_name: "Doe".to_string(),
-            email: email.to_string(),
-            created_at: chrono::Local::now().naive_local(),
-            password: hash,
-            role: Role::User.to_string(),
-        })
-        .await
-        .unwrap()
-}
-
 #[actix_web::test]
 async fn test_login_with_bad_credentials() {
-    let users_repository =
-        UsersRepository::new(api_db::connection::establish_connection(&common::CONFIG));
-    let redis_client = api_services::redis::get_redis_client(&common::CONFIG);
+    let redis_client = api_caches::redis::get_redis_client(&common::CONFIG);
+
+    let users_repository = Arc::new(UsersRepository::new(
+        api_db::connection::establish_testing_connection(&common::CONFIG),
+    ));
+    let access_refresh_tokens_cache = Arc::new(AccessRefreshTokensCacheRedis::new(
+        Arc::clone(&redis_client),
+        common::CONFIG.clone(),
+    ));
+
+    let auth_service = AuthService::new(users_repository, access_refresh_tokens_cache);
 
     let app = App::new()
         .app_data(web::Data::new(common::CONFIG.clone()))
-        .app_data(web::Data::new(users_repository.clone()))
-        .app_data(web::Data::new(redis_client.clone()))
-        .configure(auth::service::<UsersRepository>);
+        .app_data(web::Data::new(auth_service.clone()))
+        .configure(auth::service::<UsersRepository, AccessRefreshTokensCacheRedis>);
     let app = actix_web::test::init_service(app).await;
 
     let req = actix_web::test::TestRequest::post()
@@ -56,19 +43,26 @@ async fn test_login_with_bad_credentials() {
 
 #[actix_web::test]
 async fn test_login_with_good_credentials() {
-    let users_repository =
-        UsersRepository::new(api_db::connection::establish_connection(&common::CONFIG));
-    let redis_client = api_services::redis::get_redis_client(&common::CONFIG);
+    let redis_client = api_caches::redis::get_redis_client(&common::CONFIG);
 
-    let email = "mathieulebras@gmail.com";
+    let users_repository = Arc::new(UsersRepository::new(
+        api_db::connection::establish_testing_connection(&common::CONFIG),
+    ));
+    let access_refresh_tokens_cache = Arc::new(AccessRefreshTokensCacheRedis::new(
+        Arc::clone(&redis_client),
+        common::CONFIG.clone(),
+    ));
+
+    let auth_service = AuthService::new(Arc::clone(&users_repository), access_refresh_tokens_cache);
+
+    let email = "tester@test.com";
     let password = "good_password";
-    let valid_user = insert_good_user(&users_repository, email, password).await;
+    common::insert_test_user(Arc::clone(&users_repository)).await;
 
     let app = App::new()
         .app_data(web::Data::new(common::CONFIG.clone()))
-        .app_data(web::Data::new(users_repository.clone()))
-        .app_data(web::Data::new(redis_client.clone()))
-        .configure(auth::service::<UsersRepository>);
+        .app_data(web::Data::new(auth_service.clone()))
+        .configure(auth::service::<UsersRepository, AccessRefreshTokensCacheRedis>);
     let app = actix_web::test::init_service(app).await;
 
     let req = actix_web::test::TestRequest::post()
@@ -80,26 +74,31 @@ async fn test_login_with_good_credentials() {
         .to_request();
     let resp = actix_web::test::call_service(&app, req).await;
 
-    users_repository.delete(valid_user.id).await.unwrap();
-
     assert_eq!(resp.status(), StatusCode::OK);
 }
 
 #[actix_web::test]
 async fn test_register_with_email_already_exist() {
-    let users_repository =
-        UsersRepository::new(api_db::connection::establish_connection(&common::CONFIG));
-    let redis_client = api_services::redis::get_redis_client(&common::CONFIG);
+    let redis_client = api_caches::redis::get_redis_client(&common::CONFIG);
 
-    let email = "mathieulebras_exist@gmail.com";
+    let users_repository = Arc::new(UsersRepository::new(
+        api_db::connection::establish_testing_connection(&common::CONFIG),
+    ));
+    let access_refresh_tokens_cache = Arc::new(AccessRefreshTokensCacheRedis::new(
+        Arc::clone(&redis_client),
+        common::CONFIG.clone(),
+    ));
+
+    let auth_service = AuthService::new(Arc::clone(&users_repository), access_refresh_tokens_cache);
+
+    let email = "mathieulebras@gmail.com";
     let password = "good_password";
-    let valid_user = insert_good_user(&users_repository, email, password).await;
+    common::insert_test_user(Arc::clone(&users_repository)).await;
 
     let app = App::new()
         .app_data(web::Data::new(common::CONFIG.clone()))
-        .app_data(web::Data::new(users_repository.clone()))
-        .app_data(web::Data::new(redis_client.clone()))
-        .configure(auth::service::<UsersRepository>);
+        .app_data(web::Data::new(auth_service.clone()))
+        .configure(auth::service::<UsersRepository, AccessRefreshTokensCacheRedis>);
     let app = actix_web::test::init_service(app).await;
 
     let req = actix_web::test::TestRequest::post()
@@ -111,24 +110,29 @@ async fn test_register_with_email_already_exist() {
         .to_request();
     let resp = actix_web::test::call_service(&app, req).await;
 
-    users_repository.delete(valid_user.id).await.unwrap();
-
     assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
 }
 
 #[actix_web::test]
 async fn test_register_with_email_not_already_exist() {
-    let users_repository =
-        UsersRepository::new(api_db::connection::establish_connection(&common::CONFIG));
-    let redis_client = api_services::redis::get_redis_client(&common::CONFIG);
+    let redis_client = api_caches::redis::get_redis_client(&common::CONFIG);
+
+    let users_repository = Arc::new(UsersRepository::new(
+        api_db::connection::establish_testing_connection(&common::CONFIG),
+    ));
+    let access_refresh_tokens_cache = Arc::new(AccessRefreshTokensCacheRedis::new(
+        Arc::clone(&redis_client),
+        common::CONFIG.clone(),
+    ));
+
+    let auth_service = AuthService::new(users_repository, access_refresh_tokens_cache);
 
     let email = "mathieulebras_notexist@gmail.com";
 
     let app = App::new()
         .app_data(web::Data::new(common::CONFIG.clone()))
-        .app_data(web::Data::new(users_repository.clone()))
-        .app_data(web::Data::new(redis_client.clone()))
-        .configure(auth::service::<UsersRepository>);
+        .app_data(web::Data::new(auth_service.clone()))
+        .configure(auth::service::<UsersRepository, AccessRefreshTokensCacheRedis>);
     let app = actix_web::test::init_service(app).await;
 
     let req = actix_web::test::TestRequest::post()
@@ -140,29 +144,32 @@ async fn test_register_with_email_not_already_exist() {
         .to_request();
     let resp = actix_web::test::call_service(&app, req).await;
 
-    users_repository.delete_user_by_email(email).await.unwrap();
-
-    println!("{:?}", resp.response());
-
     assert_eq!(resp.status(), StatusCode::OK);
 }
 
 #[actix_web::test]
 async fn test_refresh_tokens() {
-    let users_repository =
-        UsersRepository::new(api_db::connection::establish_connection(&common::CONFIG));
-    let redis_client = api_services::redis::get_redis_client(&common::CONFIG);
+    let redis_client = api_caches::redis::get_redis_client(&common::CONFIG);
 
-    let email = "mathieulebras_refreshtest@gmail.com";
+    let users_repository = Arc::new(UsersRepository::new(
+        api_db::connection::establish_testing_connection(&common::CONFIG),
+    ));
+    let access_refresh_tokens_cache = Arc::new(AccessRefreshTokensCacheRedis::new(
+        Arc::clone(&redis_client),
+        common::CONFIG.clone(),
+    ));
+
+    let auth_service = AuthService::new(Arc::clone(&users_repository), access_refresh_tokens_cache);
+
+    let email = "tester@test.com";
     let password = "good_password";
 
-    let valid_user = insert_good_user(&users_repository, email, password).await;
+    common::insert_test_user(Arc::clone(&users_repository)).await;
 
     let app = App::new()
         .app_data(web::Data::new(common::CONFIG.clone()))
-        .app_data(web::Data::new(users_repository.clone()))
-        .app_data(web::Data::new(redis_client.clone()))
-        .configure(auth::service::<UsersRepository>);
+        .app_data(web::Data::new(auth_service.clone()))
+        .configure(auth::service::<UsersRepository, AccessRefreshTokensCacheRedis>);
 
     let app = actix_web::test::init_service(app).await;
 
@@ -189,7 +196,6 @@ async fn test_refresh_tokens() {
 
     let resp = actix_web::test::call_service(&app, req).await;
 
-    users_repository.delete(valid_user.id).await.unwrap();
     redis_client.delete(&refresh_token).await.unwrap();
 
     assert_eq!(resp.status(), StatusCode::OK);
