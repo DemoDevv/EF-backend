@@ -12,7 +12,10 @@ env:
   DEVELOPMENT: true
   VERSION: 0.0.7
   AUTH_DRIVER: jwt
+
   DATABASE_URL: postgres://user:password@localhost/mydatabase
+  DATABASE_TEST_URL: postgres://user:password@localhost/mydatabase
+
   REDIS_URL: redis://user@localhost:6379
   REDIS_USERNAME: user
   REDIS_PASSWORD: ""

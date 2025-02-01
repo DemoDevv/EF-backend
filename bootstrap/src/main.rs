@@ -12,8 +12,6 @@ mod routes;
 async fn main() -> std::io::Result<()> {
     let config = api_configs::config::Config::init();
 
-    println!("🔒 Authentification par {}.", config.auth_driver);
-
     println!("⚙️ Initialisation des bases de données.");
     let pg_connection: Pool = api_db::connection::establish_connection(&config);
     let redis_client = api_caches::redis::get_redis_client(&config);
