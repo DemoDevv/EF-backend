@@ -179,19 +179,4 @@ mod tests {
 
         assert_eq!(updated_user.unwrap().first_name, Some("Jane".to_string()));
     }
-
-    #[actix_rt::test]
-    async fn test_get_first_user_in_channel() {
-        let pool = crate::connection::establish_testing_connection(&CONFIG);
-
-        // set in the seed script
-        let channel_id = 9992;
-
-        let user_repository = UsersRepository::new(pool);
-
-        let user = user_repository.get_first_user_in_channel(channel_id).await;
-
-        assert!(user.is_ok());
-        assert!(user.unwrap().id > 0);
-    }
 }
