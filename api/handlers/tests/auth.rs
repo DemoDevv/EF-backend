@@ -91,7 +91,7 @@ async fn test_register_with_email_already_exist() {
 
     let auth_service = AuthService::new(Arc::clone(&users_repository), access_refresh_tokens_cache);
 
-    let email = "mathieulebras@gmail.com";
+    let email = "tester@test.com";
     let password = "good_password";
     common::insert_test_user(Arc::clone(&users_repository)).await;
 
