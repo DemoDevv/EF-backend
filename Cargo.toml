@@ -11,7 +11,7 @@ members = [
     "api/errors",
     "api/extractors",
     "api/handlers", "api/jobs",
-    "api/middlewares",
+    "api/middlewares", "api/procs",
     "api/services",
     "api/types",
     "bootstrap",
