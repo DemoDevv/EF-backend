@@ -1,4 +1,5 @@
 use proc_macro::TokenStream;
+use quote::ToTokens;
 use syn::{parse_macro_input, DeriveInput};
 
 extern crate proc_macro2;
@@ -7,8 +8,8 @@ extern crate syn;
 
 extern crate proc_macro;
 
-#[proc_macro_derive(AnswerFn)]
-pub fn derive_answer_fn(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(Updatable)]
+pub fn derive_updatable(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
 
     let struct_input = match input.data {
@@ -20,6 +21,12 @@ pub fn derive_answer_fn(input: TokenStream) -> TokenStream {
         syn::Fields::Named(fields) => fields,
         _ => panic!("Only named fields are supported"),
     };
+
+    // print type of each field
+
+    struct_fields.named.iter().for_each(|field| {
+        println!("{:?}", field.ty.to_token_stream().to_string());
+    });
 
     struct_fields.named.iter().for_each(|field| {
         println!("{:?}", field.ident.as_ref().unwrap().to_string());

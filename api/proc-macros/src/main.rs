@@ -1,6 +1,6 @@
-use api_proc_macros::AnswerFn;
+use api_proc_macros::Updatable;
 
-#[derive(AnswerFn)]
+#[derive(Updatable)]
 struct Structe {
     data: i32,
 }
