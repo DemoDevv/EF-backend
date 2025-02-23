@@ -17,7 +17,7 @@ Dans votre fonction de bootstrap de l'application, vous allez devoir appeler la 
 use api_jobs::start_jobs;
 
 async fn main() {
-    api_jobs::start_jobs(Jobs::new(vec![HelloWorldJob::new(None)]))
+    api_jobs::start_jobs(vec![HelloWorldJob::new(None)])
         .await
         .expect("Failed to start jobs");
 }
