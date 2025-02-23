@@ -27,5 +27,6 @@ api-extractors = { path = "../extractors" }
 api-errors = { path = "../errors" }
 api-configs = { path = "../configs" }
 api-caches = { path = "../caches" }
+api-model-traits = { path = "../model-traits" }
 
 oauth2 = "4.4.2"

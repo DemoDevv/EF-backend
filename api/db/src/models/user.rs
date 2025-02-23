@@ -1,37 +1,27 @@
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
+use api_proc_macros::Updatable;
 use api_types::user::{NewUserWithId, SafeUser, UpdatableUser};
 
-use crate::{
-    schema::users,
-    update::{Updatable, UpdateResult},
-};
+use crate::schema::users;
 
-#[derive(Queryable, Selectable, Serialize, Deserialize, AsChangeset, Identifiable, Clone)]
+#[derive(
+    Queryable, Selectable, Serialize, Deserialize, AsChangeset, Updatable, Identifiable, Clone,
+)]
 #[diesel(table_name = users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct User {
     pub id: i32,
+    #[updatable]
     pub pseudo: String,
     pub first_name: Option<String>,
     pub last_name: Option<String>,
+    #[updatable]
     pub email: String,
     pub created_at: chrono::NaiveDateTime,
     pub password: Option<String>,
     pub google_id: Option<String>,
-}
-
-impl Updatable<UpdatableUser, User> for User {
-    fn perform_convert(&self, updatable_user: UpdatableUser) -> UpdateResult<User> {
-        let user = self.clone();
-        let updated_user = User {
-            pseudo: updatable_user.pseudo.unwrap_or(user.pseudo),
-            email: updatable_user.email.unwrap_or(user.email),
-            ..user
-        };
-        Ok(updated_user)
-    }
 }
 
 impl From<User> for SafeUser {

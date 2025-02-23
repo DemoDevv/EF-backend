@@ -17,3 +17,5 @@ uuid = { workspace = true }
 api-types = { path = "../types" }
 api-errors = { path = "../errors" }
 api-configs = { path = "../configs" }
+api-model-traits = { path = "../model-traits" }
+api-proc-macros = { path = "../proc-macros" }

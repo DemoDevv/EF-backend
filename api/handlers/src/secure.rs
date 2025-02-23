@@ -18,7 +18,7 @@ pub fn service(cfg: &mut web::ServiceConfig) {
 
 pub async fn test(config: web::Data<Config>, token: BearerAuth) -> Result<HttpResponse, Error> {
     // we can unwrap here because the token is already validated
-    let claims = decode_token(config, token.token()).unwrap().claims;
+    let _ = decode_token(config, token.token()).unwrap().claims;
 
     Ok(HttpResponse::Ok().into())
 }
