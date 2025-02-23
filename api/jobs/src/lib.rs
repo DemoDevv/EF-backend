@@ -14,23 +14,20 @@ pub trait Job {
     ) -> Pin<Box<dyn Future<Output = ()> + Send>>;
 }
 
-pub struct Jobs {
-    pub jobs: Vec<Box<dyn Job + Sync + Send + 'static>>,
-}
+pub struct Jobs(Vec<Box<dyn Job + Sync + Send + 'static>>);
 
 impl Jobs {
     /// Create a new instance of `Jobs` with the given jobs.
     pub fn new(jobs: Vec<Box<dyn Job + Sync + Send + 'static>>) -> Self {
-        Self { jobs }
+        Self(jobs)
     }
 }
 
-pub async fn start_jobs(
-    jobs: Vec<Box<dyn Job + Sync + Send + 'static>>,
-) -> Result<(), JobSchedulerError> {
+/// This function starts the jobs. You have to call this function in your bootstrap code.
+pub async fn start_jobs(jobs: Jobs) -> Result<(), JobSchedulerError> {
     let sched = JobScheduler::new().await?;
 
-    for job in jobs {
+    for job in jobs.0 {
         sched
             .add(JobBuilder::new_async(job.schedule(), move |uuid, lock| {
                 job.run(lock, uuid)
