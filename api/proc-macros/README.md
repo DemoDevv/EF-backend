@@ -12,7 +12,7 @@ Cette crate fournit des macros qui peuvent être utilisées pour générer du co
 
 ### Macro Updatable
 
-Pour utiliser la macro `Updatable`, vous devez l'importer dans votre module et l'utiliser sur une structure définisant un modèle de données. Voici un exemple d'utilisation :
+Pour utiliser la macro `Updatable`, vous devez l'importer dans votre module et l'utiliser sur une structure définisant un modèle de données. Voici un exemple de structure :
 
 ```rust
 use api_proc_macros::updatable;
