@@ -12,7 +12,7 @@ members = [
     "api/extractors",
     "api/handlers",
     "api/jobs",
-    "api/middlewares",
+    "api/middlewares", "api/model-traits",
     "api/proc-macros",
     "api/services",
     "api/types",

@@ -376,6 +376,8 @@ dependencies = [
  "actix-rt",
  "api-configs",
  "api-errors",
+ "api-model-traits",
+ "api-proc-macros",
  "api-types",
  "async-trait",
  "chrono",
@@ -415,6 +417,7 @@ dependencies = [
  "api-errors",
  "api-extractors",
  "api-middlewares",
+ "api-model-traits",
  "api-services",
  "api-types",
  "argon2",
@@ -456,9 +459,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "api-model-traits"
+version = "0.1.0"
+dependencies = [
+ "api-errors",
+]
+
+[[package]]
 name = "api-proc-macros"
 version = "0.1.0"
 dependencies = [
+ "api-model-traits",
  "proc-macro2",
  "quote",
  "syn 2.0.98",

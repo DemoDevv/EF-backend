@@ -2,7 +2,8 @@ use actix_web::{web, Error, HttpResponse};
 use actix_web_httpauth::{extractors::bearer::BearerAuth, middleware::HttpAuthentication};
 
 use api_configs::config::Config;
-use api_db::{models::user::User, repository::UserRepository, update::Updatable};
+use api_db::{models::user::User, repository::UserRepository};
+use api_model_traits::update::Updatable;
 use api_services::{
     auth::{middleware::validator, services::decode_token},
     users::UsersService,
@@ -58,7 +59,7 @@ pub async fn update<R: UserRepository>(
     let user = repository
         .get(id.into_inner())
         .await?
-        .perform_convert(updatable_user.into_inner())?;
+        .perform_update(updatable_user.into_inner())?;
 
     let updated_user = repository.update(user.id, &user).await?;
 
