@@ -19,6 +19,7 @@ pub struct Jobs {
 }
 
 impl Jobs {
+    /// Create a new instance of `Jobs` with the given jobs.
     pub fn new(jobs: Vec<Box<dyn Job + Sync + Send + 'static>>) -> Self {
         Self { jobs }
     }
