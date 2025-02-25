@@ -177,3 +177,171 @@ impl TokenBucketsCache for TokenBucketsCacheRedis {
         self.save_bucket(id, &bucket).await
     }
 }
+
+mod tests {
+    use super::*;
+    use once_cell::sync::Lazy;
+
+    const CONFIG: Lazy<api_configs::config::Config> =
+        Lazy::new(|| api_configs::config::Config::init());
+    #[allow(dead_code)]
+    const CLIENT: Lazy<RedisClient> = Lazy::new(|| crate::redis::get_redis_client(&CONFIG.clone()));
+
+    #[actix_rt::test]
+    async fn test_create_default_token_bucket() {
+        let cache = TokenBucketsCacheRedis::new(CLIENT.clone());
+
+        let id = "test-1";
+        cache.create_bucket(id).await.unwrap();
+
+        let bucket_from_cache = cache
+            .client
+            .hget_multiple(
+                &format!("ratelimit:{}", id),
+                vec![
+                    "capacity".to_string(),
+                    "tokens".to_string(),
+                    "last_refill_time".to_string(),
+                ],
+            )
+            .await
+            .unwrap();
+
+        // Vérification des valeurs par défaut
+        assert_eq!(bucket_from_cache[0].as_ref().unwrap(), "100"); // Capacity
+        assert_eq!(bucket_from_cache[1].as_ref().unwrap(), "100"); // Tokens
+        assert!(bucket_from_cache[2].is_some()); // Last refill time should exist
+
+        cache
+            .client
+            .delete(&format!("ratelimit:{}", id))
+            .await
+            .unwrap();
+    }
+
+    #[actix_rt::test]
+    async fn test_refill_token_bucket() {
+        let cache = TokenBucketsCacheRedis::new(CLIENT.clone());
+
+        let id = "test-2";
+        cache.create_bucket(id).await.unwrap();
+
+        let bucket_from_cache = cache
+            .client
+            .hget_multiple(
+                &format!("ratelimit:{}", id),
+                vec![
+                    "capacity".to_string(),
+                    "tokens".to_string(),
+                    "last_refill_time".to_string(),
+                ],
+            )
+            .await
+            .unwrap();
+
+        let mut bucket = TokenBucket::from_cache(bucket_from_cache);
+        bucket.tokens = bucket.tokens - 50;
+        let initial_tokens = bucket.tokens;
+
+        // Simuler l'écoulement du temps (par exemple 5 secondes)
+        std::thread::sleep(std::time::Duration::new(5, 0));
+
+        bucket.refill(); // Refill the bucket
+
+        // Vérifier que le nombre de tokens a été mis à jour
+        assert!(bucket.tokens > initial_tokens);
+
+        cache
+            .client
+            .delete(&format!("ratelimit:{}", id))
+            .await
+            .unwrap();
+    }
+
+    #[actix_rt::test]
+    async fn test_save_token_bucket_to_redis() {
+        let cache = TokenBucketsCacheRedis::new(CLIENT.clone());
+
+        let id = "test-3";
+        let bucket = TokenBucket::default(); // Création du bucket par défaut
+        cache.save_bucket(id, &bucket).await.unwrap(); // Sauvegarde dans Redis
+
+        // Vérification que les données ont bien été sauvegardées dans Redis simulé
+        let saved_bucket = cache
+            .client
+            .hget_multiple(
+                &format!("ratelimit:{}", id),
+                vec![
+                    "capacity".to_string(),
+                    "tokens".to_string(),
+                    "last_refill_time".to_string(),
+                ],
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(saved_bucket[0].as_ref().unwrap(), "100");
+        assert_eq!(saved_bucket[1].as_ref().unwrap(), "100");
+
+        cache
+            .client
+            .delete(&format!("ratelimit:{}", id))
+            .await
+            .unwrap();
+    }
+
+    #[actix_rt::test]
+    async fn test_error_handling_redis_get() {
+        let cache = TokenBucketsCacheRedis::new(CLIENT.clone());
+
+        let id = "non-existent-id";
+
+        // Essayons de récupérer un bucket qui n'existe pas
+        let result = cache
+            .client
+            .hget_multiple(
+                &format!("ratelimit:{}", id),
+                vec![
+                    "capacity".to_string(),
+                    "tokens".to_string(),
+                    "last_refill_time".to_string(),
+                ],
+            )
+            .await;
+
+        assert!(result.is_ok_and(|el| el.iter().all(|v| v.is_none())));
+    }
+
+    #[actix_rt::test]
+    async fn test_from_cache() {
+        let cache = TokenBucketsCacheRedis::new(CLIENT.clone());
+
+        let id = "test-4";
+        cache.create_bucket(id).await.unwrap();
+
+        // Récupérer les données du bucket depuis Redis
+        let bucket_from_cache = cache
+            .client
+            .hget_multiple(
+                &format!("ratelimit:{}", id),
+                vec![
+                    "capacity".to_string(),
+                    "tokens".to_string(),
+                    "last_refill_time".to_string(),
+                ],
+            )
+            .await
+            .unwrap();
+
+        // Vérifier que le `TokenBucket` est correctement créé à partir du cache
+        let bucket = TokenBucket::from_cache(bucket_from_cache);
+        assert_eq!(bucket.capacity, 100);
+        assert_eq!(bucket.tokens, 100);
+
+        cache
+            .client
+            .delete(&format!("ratelimit:{}", id))
+            .await
+            .unwrap();
+    }
+}
