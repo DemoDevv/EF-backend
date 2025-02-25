@@ -1,8 +1,10 @@
 use std::str::FromStr;
 
-use crate::redis::{RedisClient, RedisRepository, RedisRepositoryResult};
+use crate::{
+    errors::RedisRepositoryError,
+    redis::{RedisClient, RedisRepository, RedisRepositoryResult},
+};
 use api_configs::config::Config;
-use api_errors::ServiceError;
 
 /// Trait for managing refresh tokens in a Redis-based cache.
 #[async_trait::async_trait]
@@ -132,10 +134,7 @@ impl AccessRefreshTokensCache for AccessRefreshTokensCacheRedis {
         let user_meta_data = self.client.get(refresh_token).await?;
 
         if user_meta_data.is_none() {
-            return Err(ServiceError {
-                message: Some("We can't get the user meta data".to_string()),
-                error_type: api_errors::ServiceErrorType::UnAuthorized,
-            });
+            return Err(RedisRepositoryError::NotFound);
         }
 
         Ok(UserMetaData::from_str(&user_meta_data.unwrap()).unwrap())

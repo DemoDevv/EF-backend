@@ -2,10 +2,12 @@ use std::sync::Arc;
 
 use api_configs::config::Config;
 
+use crate::errors::RedisRepositoryError;
+
 extern crate redis;
 
 // type initialization
-pub type RedisRepositoryResult<T> = Result<T, api_errors::ServiceError>;
+pub type RedisRepositoryResult<T> = Result<T, RedisRepositoryError>;
 pub type RedisClient = Arc<redis::Client>;
 
 // public function to get a redis client

@@ -1,4 +1,7 @@
-use crate::redis::{RedisClient, RedisRepository, RedisRepositoryResult};
+use crate::{
+    errors::RedisRepositoryError,
+    redis::{RedisClient, RedisRepository, RedisRepositoryResult},
+};
 use chrono::{DateTime, Utc};
 
 /// The refill rate in tokens per second.
@@ -172,6 +175,10 @@ impl TokenBucketsCache for TokenBucketsCacheRedis {
             )
             .await?;
 
+        if bucket_from_cache.iter().all(|v| v.is_none()) {
+            return Err(RedisRepositoryError::NotFound);
+        }
+
         let mut bucket = TokenBucket::from_cache(bucket_from_cache);
         bucket.refill();
         self.save_bucket(id, &bucket).await
@@ -310,6 +317,18 @@ mod tests {
             .await;
 
         assert!(result.is_ok_and(|el| el.iter().all(|v| v.is_none())));
+    }
+
+    #[actix_rt::test]
+    async fn test_error_handling_refill() {
+        let cache = TokenBucketsCacheRedis::new(CLIENT.clone());
+
+        let id = "non-existent-id-2";
+
+        // Essayons de récupérer un bucket qui n'existe pas
+        let result = cache.refill_bucket(id).await;
+
+        assert!(result.is_err());
     }
 
     #[actix_rt::test]
