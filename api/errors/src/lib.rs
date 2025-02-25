@@ -56,10 +56,10 @@ impl ResponseError for ServiceError {
     }
 }
 
-impl From<redis::RedisError> for ServiceError {
-    fn from(_error: redis::RedisError) -> Self {
+impl From<api_caches::errors::RedisRepositoryError> for ServiceError {
+    fn from(error: api_caches::errors::RedisRepositoryError) -> Self {
         ServiceError {
-            message: Some("Redis error".to_string()),
+            message: Some(error.to_string()),
             error_type: ServiceErrorType::DatabaseError,
         }
     }
