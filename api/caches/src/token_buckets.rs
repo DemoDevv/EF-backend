@@ -1,15 +1,20 @@
 use crate::redis::{RedisClient, RedisRepository, RedisRepositoryResult};
+use chrono::{DateTime, Utc};
 
 /// The refill rate in tokens per second.
 const REFILL_RATE_PER_SECOND: i64 = 10;
 /// The default maximum capacity of the token bucket.
 const DEFAULT_CAPACITY: u64 = 100;
 
+/// A structure representing a token bucket for rate limiting.
 #[derive(Clone)]
 pub struct TokenBucket {
+    /// The maximum number of tokens the bucket can hold.
     capacity: u64,
+    /// The current number of available tokens.
     tokens: u64,
-    last_refill_time: chrono::DateTime<chrono::Utc>,
+    /// The last time the bucket was refilled.
+    last_refill_time: DateTime<Utc>,
 }
 
 impl Default for TokenBucket {
@@ -18,7 +23,7 @@ impl Default for TokenBucket {
         TokenBucket {
             capacity: DEFAULT_CAPACITY,
             tokens: 100,
-            last_refill_time: chrono::Utc::now(),
+            last_refill_time: Utc::now(),
         }
     }
 }
@@ -34,12 +39,14 @@ fn _from(bucket: &TokenBucket) -> Vec<(String, String)> {
     ]
 }
 
+/// Converts a `TokenBucket` into a vector of key-value string pairs for Redis storage.
 impl From<TokenBucket> for Vec<(String, String)> {
     fn from(bucket: TokenBucket) -> Self {
         _from(&bucket)
     }
 }
 
+/// Converts a reference to `TokenBucket` into a vector of key-value string pairs for Redis storage.
 impl From<&TokenBucket> for Vec<(String, String)> {
     fn from(bucket: &TokenBucket) -> Self {
         _from(bucket)
@@ -47,6 +54,13 @@ impl From<&TokenBucket> for Vec<(String, String)> {
 }
 
 impl TokenBucket {
+    /// Creates a `TokenBucket` from cached Redis values.
+    ///
+    /// # Arguments
+    /// * `cache` - A vector of optional strings representing Redis values.
+    ///
+    /// # Returns
+    /// A `TokenBucket` initialized from the cache.
     fn from_cache(cache: Vec<Option<String>>) -> Self {
         TokenBucket {
             capacity: cache[0]
@@ -59,14 +73,15 @@ impl TokenBucket {
                 .unwrap_or(0),
             last_refill_time: cache[2]
                 .as_ref()
-                .and_then(|s| chrono::DateTime::parse_from_rfc3339(s).ok())
+                .and_then(|s| DateTime::parse_from_rfc3339(s).ok())
                 .map(|dt| dt.to_utc())
-                .unwrap_or_else(chrono::Utc::now),
+                .unwrap_or_else(Utc::now),
         }
     }
 
+    /// Refills the token bucket based on the elapsed time since the last refill.
     fn refill(&mut self) {
-        let now = chrono::Utc::now();
+        let now = Utc::now();
         let elapsed = now.signed_duration_since(self.last_refill_time);
 
         let tokens_to_add = (elapsed.num_seconds() * REFILL_RATE_PER_SECOND).max(0);
@@ -78,20 +93,34 @@ impl TokenBucket {
     }
 }
 
+/// Trait for managing token buckets in a Redis-based cache.
 #[async_trait::async_trait]
 pub trait TokenBucketsCache: Clone + Send + Sync + 'static {
+    /// Saves a token bucket to Redis.
     async fn save_bucket(&self, id: &str, bucket: &TokenBucket) -> RedisRepositoryResult<()>;
+    /// Creates a new token bucket with default values in Redis.
     async fn create_bucket(&self, id: &str) -> RedisRepositoryResult<()>;
+    /// Refills an existing token bucket and updates Redis.
     async fn refill_bucket(&self, id: &str) -> RedisRepositoryResult<()>;
 }
 
+/// Redis-based implementation of `TokenBucketsCache`.
 #[derive(Clone)]
 pub struct TokenBucketsCacheRedis {
+    /// Redis client instance.
     client: RedisClient,
+    /// Prefix used for Redis keys.
     prefix: String,
 }
 
 impl TokenBucketsCacheRedis {
+    /// Creates a new instance of `TokenBucketsCacheRedis`.
+    ///
+    /// # Arguments
+    /// * `client` - The Redis client instance.
+    ///
+    /// # Returns
+    /// A new `TokenBucketsCacheRedis` instance.
     pub fn new(client: RedisClient) -> Self {
         TokenBucketsCacheRedis {
             client,
@@ -102,12 +131,21 @@ impl TokenBucketsCacheRedis {
 
 #[async_trait::async_trait]
 impl TokenBucketsCache for TokenBucketsCacheRedis {
+    /// Saves a token bucket to Redis.
+    ///
+    /// # Arguments
+    /// * `id` - The unique identifier for the token bucket (ip or uuid).
+    /// * `bucket` - The token bucket instance to save.
     async fn save_bucket(&self, id: &str, bucket: &TokenBucket) -> RedisRepositoryResult<()> {
         self.client
             .hset_multiple(&format!("{}:{}", self.prefix, id), bucket.into())
             .await
     }
 
+    /// Creates a new token bucket in Redis with default values.
+    ///
+    /// # Arguments
+    /// * `id` - The unique identifier for the token bucket (ip or uuid).
     async fn create_bucket(&self, id: &str) -> RedisRepositoryResult<()> {
         self.client
             .hset_multiple(
@@ -117,6 +155,10 @@ impl TokenBucketsCache for TokenBucketsCacheRedis {
             .await
     }
 
+    /// Refills an existing token bucket and updates Redis.
+    ///
+    /// # Arguments
+    /// * `id` - The unique identifier for the token bucket (ip or uuid).
     async fn refill_bucket(&self, id: &str) -> RedisRepositoryResult<()> {
         let bucket_from_cache = self
             .client
@@ -131,9 +173,7 @@ impl TokenBucketsCache for TokenBucketsCacheRedis {
             .await?;
 
         let mut bucket = TokenBucket::from_cache(bucket_from_cache);
-
         bucket.refill();
-
         self.save_bucket(id, &bucket).await
     }
 }
