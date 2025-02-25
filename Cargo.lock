@@ -355,8 +355,9 @@ version = "0.1.0"
 dependencies = [
  "actix-rt",
  "api-configs",
- "api-errors",
  "async-trait",
+ "chrono",
+ "log",
  "once_cell",
  "redis",
 ]
@@ -392,6 +393,7 @@ name = "api-errors"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "api-caches",
  "redis",
  "reqwest 0.12.9",
 ]
