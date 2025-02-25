@@ -7,6 +7,8 @@ edition = "2021"
 async-trait = { workspace = true }
 once_cell = { workspace = true }
 actix-rt = { workspace = true }
+chrono = { workspace = true }
+log = { workspace = true }
 
 api-configs = { path = "../configs" }
 api-errors = { path = "../errors" }

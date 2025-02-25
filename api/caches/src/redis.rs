@@ -18,6 +18,17 @@ pub trait RedisRepository: Clone + Send + Sync + 'static {
     async fn ping(&self) -> RedisRepositoryResult<Option<String>>;
     async fn get(&self, key: &str) -> RedisRepositoryResult<Option<String>>;
     async fn set(&self, key: &str, value: &str) -> RedisRepositoryResult<()>;
+    async fn hset_multiple(
+        &self,
+        key: &str,
+        fields: Vec<(String, String)>,
+    ) -> RedisRepositoryResult<()>;
+    async fn hget_multiple(
+        &self,
+        key: &str,
+        fields: Vec<String>,
+    ) -> RedisRepositoryResult<Vec<Option<String>>>;
+    async fn hget(&self, key: &str, field: &str) -> RedisRepositoryResult<Option<String>>;
     async fn ttl(&self, key: &str) -> RedisRepositoryResult<i64>;
     async fn update(&self, key: &str, value: &str) -> RedisRepositoryResult<()>;
     async fn update_ttl(&self, key: &str, value: &str, ttl: i64) -> RedisRepositoryResult<()>;
@@ -48,6 +59,44 @@ impl RedisRepository for RedisClient {
         redis::cmd("SET")
             .arg(key)
             .arg(value)
+            .query_async(&mut con)
+            .await
+            .map_err(|e| e.into())
+    }
+
+    async fn hset_multiple(
+        &self,
+        key: &str,
+        fields: Vec<(String, String)>,
+    ) -> RedisRepositoryResult<()> {
+        let mut conn = self.get_multiplexed_async_connection().await?;
+        redis::cmd("HMSET")
+            .arg(key)
+            .arg(fields)
+            .query_async(&mut conn)
+            .await
+            .map_err(|e| e.into())
+    }
+
+    async fn hget_multiple(
+        &self,
+        key: &str,
+        fields: Vec<String>,
+    ) -> RedisRepositoryResult<Vec<Option<String>>> {
+        let mut conn = self.get_multiplexed_async_connection().await?;
+        redis::cmd("HMGET")
+            .arg(key)
+            .arg(fields)
+            .query_async(&mut conn)
+            .await
+            .map_err(|e| e.into())
+    }
+
+    async fn hget(&self, key: &str, field: &str) -> RedisRepositoryResult<Option<String>> {
+        let mut con = self.get_multiplexed_async_connection().await?;
+        redis::cmd("HGET")
+            .arg(key)
+            .arg(field)
             .query_async(&mut con)
             .await
             .map_err(|e| e.into())
