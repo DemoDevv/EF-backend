@@ -1,13 +1,16 @@
 use crate::{
-    errors::RedisRepositoryError,
+    errors::{RateLimitError, RedisRepositoryError},
     redis::{RedisClient, RedisRepository, RedisRepositoryResult},
 };
+use actix_web::http::Method;
 use chrono::{DateTime, Utc};
 
 /// The refill rate in tokens per second.
 const REFILL_RATE_PER_SECOND: i64 = 10;
 /// The default maximum capacity of the token bucket.
 const DEFAULT_CAPACITY: u64 = 100;
+
+pub type RateLimiterResult<T> = Result<T, RateLimitError>;
 
 /// A structure representing a token bucket for rate limiting.
 #[derive(Clone)]
@@ -103,8 +106,11 @@ pub trait TokenBucketsCache: Clone + Send + Sync + 'static {
     async fn save_bucket(&self, id: &str, bucket: &TokenBucket) -> RedisRepositoryResult<()>;
     /// Creates a new token bucket with default values in Redis.
     async fn create_bucket(&self, id: &str) -> RedisRepositoryResult<()>;
+    /// Checks if a token bucket exists in Redis.
+    async fn bucket_exists(&self, id: &str) -> RedisRepositoryResult<bool>;
     /// Refills an existing token bucket and updates Redis.
     async fn refill_bucket(&self, id: &str) -> RedisRepositoryResult<()>;
+    async fn consume_tokens(&self, id: &str, method: &Method) -> RateLimiterResult<()>;
 }
 
 /// Redis-based implementation of `TokenBucketsCache`.
@@ -158,6 +164,14 @@ impl TokenBucketsCache for TokenBucketsCacheRedis {
             .await
     }
 
+    /// Checks if a token bucket exists in Redis.
+    ///
+    /// # Arguments
+    /// * `id` - The unique identifier for the token bucket (ip or uuid).
+    async fn bucket_exists(&self, id: &str) -> RedisRepositoryResult<bool> {
+        self.client.exists(&format!("{}:{}", self.prefix, id)).await
+    }
+
     /// Refills an existing token bucket and updates Redis.
     ///
     /// # Arguments
@@ -182,6 +196,45 @@ impl TokenBucketsCache for TokenBucketsCacheRedis {
         let mut bucket = TokenBucket::from_cache(bucket_from_cache);
         bucket.refill();
         self.save_bucket(id, &bucket).await
+    }
+
+    /// Consumes tokens from a token bucket and updates Redis.
+    ///
+    /// # Arguments
+    /// * `id` - The unique identifier for the token bucket (ip or uuid).
+    /// * `method` - The HTTP method used to consume tokens.
+    async fn consume_tokens(&self, id: &str, method: &Method) -> RateLimiterResult<()> {
+        let tokens = self
+            .client
+            .hget(&format!("{}:{}", self.prefix, id), "tokens")
+            .await?;
+
+        if tokens.is_none() {
+            return Err(RateLimitError::NotFound);
+        }
+
+        let tokens = tokens.unwrap().parse::<u64>()?;
+
+        let used_tokens = match method {
+            &Method::GET => 1,
+            _ => 5,
+        };
+
+        let new_tokens = tokens.saturating_sub(used_tokens);
+
+        if new_tokens == 0 {
+            return Err(RateLimitError::RateLimitExceeded);
+        }
+
+        self.client
+            .hset(
+                &format!("{}:{}", self.prefix, id),
+                "tokens",
+                &(tokens - used_tokens).to_string(),
+            )
+            .await?;
+
+        Ok(())
     }
 }
 
@@ -356,6 +409,76 @@ mod tests {
         let bucket = TokenBucket::from_cache(bucket_from_cache);
         assert_eq!(bucket.capacity, 100);
         assert_eq!(bucket.tokens, 100);
+
+        cache
+            .client
+            .delete(&format!("ratelimit:{}", id))
+            .await
+            .unwrap();
+    }
+
+    #[actix_rt::test]
+    async fn test_short_consume_tokens() {
+        let cache = TokenBucketsCacheRedis::new(CLIENT.clone());
+
+        let id = "test-5";
+        cache.create_bucket(id).await.unwrap();
+
+        cache.consume_tokens(id, &Method::GET).await.unwrap();
+
+        // Récupérer les données du bucket depuis Redis
+        let bucket_from_cache = cache
+            .client
+            .hget_multiple(
+                &format!("ratelimit:{}", id),
+                vec![
+                    "capacity".to_string(),
+                    "tokens".to_string(),
+                    "last_refill_time".to_string(),
+                ],
+            )
+            .await
+            .unwrap();
+
+        // Vérifier que le `TokenBucket` est correctement créé à partir du cache
+        let bucket = TokenBucket::from_cache(bucket_from_cache);
+        assert_eq!(bucket.capacity, 100);
+        assert_eq!(bucket.tokens, 99);
+
+        cache
+            .client
+            .delete(&format!("ratelimit:{}", id))
+            .await
+            .unwrap();
+    }
+
+    #[actix_rt::test]
+    async fn test_big_consume_tokens() {
+        let cache = TokenBucketsCacheRedis::new(CLIENT.clone());
+
+        let id = "test-6";
+        cache.create_bucket(id).await.unwrap();
+
+        cache.consume_tokens(id, &Method::POST).await.unwrap();
+
+        // Récupérer les données du bucket depuis Redis
+        let bucket_from_cache = cache
+            .client
+            .hget_multiple(
+                &format!("ratelimit:{}", id),
+                vec![
+                    "capacity".to_string(),
+                    "tokens".to_string(),
+                    "last_refill_time".to_string(),
+                ],
+            )
+            .await
+            .unwrap();
+
+        // Vérifier que le `TokenBucket` est correctement créé à partir du cache
+        let bucket = TokenBucket::from_cache(bucket_from_cache);
+        assert_eq!(bucket.capacity, 100);
+        assert_eq!(bucket.tokens, 95);
 
         cache
             .client
