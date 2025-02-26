@@ -1,3 +1,3 @@
 pub(crate) mod helpers;
 
-mod example;
+mod rate_limiter;
