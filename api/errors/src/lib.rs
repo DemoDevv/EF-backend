@@ -14,6 +14,7 @@ pub enum ServiceErrorType {
     UnprocessableEntityError,
     Conflict,
     NotFound,
+    RateLimitExceeded,
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -48,6 +49,7 @@ impl ResponseError for ServiceError {
             ServiceErrorType::UnprocessableEntityError => StatusCode::UNPROCESSABLE_ENTITY,
             ServiceErrorType::Conflict => StatusCode::CONFLICT,
             ServiceErrorType::NotFound => StatusCode::NOT_FOUND,
+            ServiceErrorType::RateLimitExceeded => StatusCode::TOO_MANY_REQUESTS,
         }
     }
 
@@ -61,6 +63,15 @@ impl From<api_caches::errors::RedisRepositoryError> for ServiceError {
         ServiceError {
             message: Some(error.to_string()),
             error_type: ServiceErrorType::DatabaseError,
+        }
+    }
+}
+
+impl From<api_caches::errors::RateLimitError> for ServiceError {
+    fn from(error: api_caches::errors::RateLimitError) -> Self {
+        ServiceError {
+            message: Some(error.to_string()),
+            error_type: ServiceErrorType::RateLimitExceeded,
         }
     }
 }
