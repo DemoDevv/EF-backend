@@ -18,6 +18,7 @@ pub fn get_redis_client(config: &Config) -> RedisClient {
 #[async_trait::async_trait]
 pub trait RedisRepository: Clone + Send + Sync + 'static {
     async fn ping(&self) -> RedisRepositoryResult<Option<String>>;
+    async fn exists(&self, key: &str) -> RedisRepositoryResult<bool>;
     async fn get(&self, key: &str) -> RedisRepositoryResult<Option<String>>;
     async fn set(&self, key: &str, value: &str) -> RedisRepositoryResult<()>;
     async fn hset_multiple(
@@ -31,6 +32,7 @@ pub trait RedisRepository: Clone + Send + Sync + 'static {
         fields: Vec<String>,
     ) -> RedisRepositoryResult<Vec<Option<String>>>;
     async fn hget(&self, key: &str, field: &str) -> RedisRepositoryResult<Option<String>>;
+    async fn hset(&self, key: &str, field: &str, value: &str) -> RedisRepositoryResult<()>;
     async fn ttl(&self, key: &str) -> RedisRepositoryResult<i64>;
     async fn update(&self, key: &str, value: &str) -> RedisRepositoryResult<()>;
     async fn update_ttl(&self, key: &str, value: &str, ttl: i64) -> RedisRepositoryResult<()>;
@@ -42,6 +44,15 @@ impl RedisRepository for RedisClient {
     async fn ping(&self) -> RedisRepositoryResult<Option<String>> {
         let mut con = self.get_multiplexed_async_connection().await?;
         redis::cmd("PING")
+            .query_async(&mut con)
+            .await
+            .map_err(|e| e.into())
+    }
+
+    async fn exists(&self, key: &str) -> RedisRepositoryResult<bool> {
+        let mut con = self.get_multiplexed_async_connection().await?;
+        redis::cmd("EXISTS")
+            .arg(key)
             .query_async(&mut con)
             .await
             .map_err(|e| e.into())
@@ -99,6 +110,17 @@ impl RedisRepository for RedisClient {
         redis::cmd("HGET")
             .arg(key)
             .arg(field)
+            .query_async(&mut con)
+            .await
+            .map_err(|e| e.into())
+    }
+
+    async fn hset(&self, key: &str, field: &str, value: &str) -> RedisRepositoryResult<()> {
+        let mut con = self.get_multiplexed_async_connection().await?;
+        redis::cmd("HSET")
+            .arg(key)
+            .arg(field)
+            .arg(value)
             .query_async(&mut con)
             .await
             .map_err(|e| e.into())
