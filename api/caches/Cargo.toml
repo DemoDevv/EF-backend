@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+actix-web = { workspace = true }
 async-trait = { workspace = true }
 once_cell = { workspace = true }
 actix-rt = { workspace = true }
