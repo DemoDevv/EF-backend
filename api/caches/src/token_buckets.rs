@@ -1,6 +1,6 @@
 use crate::{
-    errors::{RateLimitError, RedisRepositoryError},
-    redis::{RedisClient, RedisRepository, RedisRepositoryResult},
+    errors::RateLimitError,
+    redis::{RedisClient, RedisRepository},
 };
 use actix_web::http::Method;
 use chrono::{DateTime, Utc};
@@ -103,13 +103,14 @@ impl TokenBucket {
 #[async_trait::async_trait]
 pub trait TokenBucketsCache: Clone + Send + Sync + 'static {
     /// Saves a token bucket to Redis.
-    async fn save_bucket(&self, id: &str, bucket: &TokenBucket) -> RedisRepositoryResult<()>;
+    async fn save_bucket(&self, id: &str, bucket: &TokenBucket) -> RateLimiterResult<()>;
     /// Creates a new token bucket with default values in Redis.
-    async fn create_bucket(&self, id: &str) -> RedisRepositoryResult<()>;
+    async fn create_bucket(&self, id: &str) -> RateLimiterResult<()>;
     /// Checks if a token bucket exists in Redis.
-    async fn bucket_exists(&self, id: &str) -> RedisRepositoryResult<bool>;
+    async fn bucket_exists(&self, id: &str) -> RateLimiterResult<bool>;
     /// Refills an existing token bucket and updates Redis.
-    async fn refill_bucket(&self, id: &str) -> RedisRepositoryResult<()>;
+    async fn refill_bucket(&self, id: &str) -> RateLimiterResult<()>;
+    /// Consumes tokens from a token bucket and updates Redis.
     async fn consume_tokens(&self, id: &str, method: &Method) -> RateLimiterResult<()>;
 }
 
@@ -145,38 +146,43 @@ impl TokenBucketsCache for TokenBucketsCacheRedis {
     /// # Arguments
     /// * `id` - The unique identifier for the token bucket (ip or uuid).
     /// * `bucket` - The token bucket instance to save.
-    async fn save_bucket(&self, id: &str, bucket: &TokenBucket) -> RedisRepositoryResult<()> {
+    async fn save_bucket(&self, id: &str, bucket: &TokenBucket) -> RateLimiterResult<()> {
         self.client
             .hset_multiple(&format!("{}:{}", self.prefix, id), bucket.into())
             .await
+            .map_err(|err| RateLimitError::from(err))
     }
 
     /// Creates a new token bucket in Redis with default values.
     ///
     /// # Arguments
     /// * `id` - The unique identifier for the token bucket (ip or uuid).
-    async fn create_bucket(&self, id: &str) -> RedisRepositoryResult<()> {
+    async fn create_bucket(&self, id: &str) -> RateLimiterResult<()> {
         self.client
             .hset_multiple(
                 &format!("{}:{}", self.prefix, id),
                 TokenBucket::default().into(),
             )
             .await
+            .map_err(|err| RateLimitError::from(err))
     }
 
     /// Checks if a token bucket exists in Redis.
     ///
     /// # Arguments
     /// * `id` - The unique identifier for the token bucket (ip or uuid).
-    async fn bucket_exists(&self, id: &str) -> RedisRepositoryResult<bool> {
-        self.client.exists(&format!("{}:{}", self.prefix, id)).await
+    async fn bucket_exists(&self, id: &str) -> RateLimiterResult<bool> {
+        self.client
+            .exists(&format!("{}:{}", self.prefix, id))
+            .await
+            .map_err(|err| RateLimitError::from(err))
     }
 
     /// Refills an existing token bucket and updates Redis.
     ///
     /// # Arguments
     /// * `id` - The unique identifier for the token bucket (ip or uuid).
-    async fn refill_bucket(&self, id: &str) -> RedisRepositoryResult<()> {
+    async fn refill_bucket(&self, id: &str) -> RateLimiterResult<()> {
         let bucket_from_cache = self
             .client
             .hget_multiple(
@@ -190,7 +196,7 @@ impl TokenBucketsCache for TokenBucketsCacheRedis {
             .await?;
 
         if bucket_from_cache.iter().all(|v| v.is_none()) {
-            return Err(RedisRepositoryError::NotFound);
+            return Err(RateLimitError::NotFound);
         }
 
         let mut bucket = TokenBucket::from_cache(bucket_from_cache);
