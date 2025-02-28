@@ -354,6 +354,7 @@ name = "api-caches"
 version = "0.1.0"
 dependencies = [
  "actix-rt",
+ "actix-web",
  "api-configs",
  "async-trait",
  "chrono",
