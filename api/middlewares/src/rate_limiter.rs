@@ -5,7 +5,10 @@ use actix_web::{
 use api_caches::token_buckets::{TokenBucketsCache, TokenBucketsCacheRedis};
 use api_errors::ServiceError;
 use futures_util::future::LocalBoxFuture;
-use std::future::{ready, Ready};
+use std::{
+    future::{ready, Ready},
+    sync::Arc,
+};
 
 pub struct RateLimiter;
 
@@ -57,7 +60,9 @@ where
             .and_then(|el| Some(el.to_string()))
             .unwrap_or(ip);
 
-        let bucket_cache = req.app_data::<web::Data<TokenBucketsCacheRedis>>().cloned();
+        let bucket_cache = req
+            .app_data::<web::Data<Arc<TokenBucketsCacheRedis>>>()
+            .cloned();
 
         let http_method = req.method().clone();
 
@@ -88,6 +93,12 @@ where
                     .consume_tokens(&user_id, &http_method)
                     .await
                     .map_err(|err| ServiceError::from(err))?;
+            } else {
+                // Handle the case when bucket_cache is None
+                // For example, you can log an error or return a default value
+                log::error!(
+                    "TokenBucketsCacheRedis not found, make sure it is set in your app data"
+                );
             }
 
             fut.await

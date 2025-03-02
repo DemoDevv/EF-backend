@@ -11,6 +11,7 @@ futures-util = { workspace = true }
 actix-web-httpauth = { workspace = true }
 futures-core = "0.3.30"
 serde_json = { workspace = true }
+log = { workspace = true }
 
 api-services = { path = "../services" }
 api-caches = { path = "../caches" }
