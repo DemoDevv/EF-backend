@@ -344,6 +344,7 @@ dependencies = [
  "api-errors",
  "api-handlers",
  "api-jobs",
+ "api-middlewares",
  "api-services",
  "env_logger",
  "oauth2",
@@ -458,6 +459,7 @@ dependencies = [
  "api-services",
  "futures-core",
  "futures-util",
+ "log",
  "serde_json",
 ]
 

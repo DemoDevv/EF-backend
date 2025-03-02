@@ -5,6 +5,7 @@ use actix_web::{middleware::Logger, web, App, HttpServer};
 
 use api_db::connection::Pool;
 use api_errors::{ServiceError, ServiceErrorType};
+use api_middlewares::rate_limiter::RateLimiter;
 
 mod routes;
 
@@ -28,6 +29,10 @@ async fn main() -> std::io::Result<()> {
             config.clone(),
         ),
     );
+
+    let rate_limiter_cache = Arc::new(api_caches::token_buckets::TokenBucketsCacheRedis::new(
+        Arc::clone(&redis_client),
+    ));
 
     println!("⚙️ Création des répositories pour injection de dépendances.");
     let users_repository = Arc::new(
@@ -66,8 +71,10 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(user_service.clone()))
             .app_data(web::Data::new(redis_client.clone()))
             .app_data(web::Data::new(oauth_client.clone()))
+            .app_data(web::Data::new(rate_limiter_cache.clone()))
             .wrap(cors)
             .wrap(Logger::default())
+            .wrap(RateLimiter)
             .configure(routes::config)
     })
     .bind("127.0.0.1:8080")?
