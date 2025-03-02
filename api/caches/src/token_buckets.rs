@@ -147,6 +147,7 @@ impl TokenBucketsCache for TokenBucketsCacheRedis {
     /// * `id` - The unique identifier for the token bucket (ip or uuid).
     /// * `bucket` - The token bucket instance to save.
     async fn save_bucket(&self, id: &str, bucket: &TokenBucket) -> RateLimiterResult<()> {
+        log::info!("Saving token bucket for {}", id);
         self.client
             .hset_multiple(&format!("{}:{}", self.prefix, id), bucket.into())
             .await
@@ -158,6 +159,7 @@ impl TokenBucketsCache for TokenBucketsCacheRedis {
     /// # Arguments
     /// * `id` - The unique identifier for the token bucket (ip or uuid).
     async fn create_bucket(&self, id: &str) -> RateLimiterResult<()> {
+        log::info!("Creating token bucket for {}", id);
         self.client
             .hset_multiple(
                 &format!("{}:{}", self.prefix, id),
@@ -201,6 +203,7 @@ impl TokenBucketsCache for TokenBucketsCacheRedis {
 
         let mut bucket = TokenBucket::from_cache(bucket_from_cache);
         bucket.refill();
+        log::info!("Token bucket for {} refilled", id);
         self.save_bucket(id, &bucket).await
     }
 
@@ -231,6 +234,8 @@ impl TokenBucketsCache for TokenBucketsCacheRedis {
         if new_tokens == 0 {
             return Err(RateLimitError::RateLimitExceeded);
         }
+
+        log::info!("Consuming tokens for id: {}, method: {:?}", id, method);
 
         self.client
             .hset(
