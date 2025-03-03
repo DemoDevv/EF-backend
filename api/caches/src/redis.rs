@@ -2,10 +2,12 @@ use std::sync::Arc;
 
 use api_configs::config::Config;
 
+use crate::errors::RedisRepositoryError;
+
 extern crate redis;
 
 // type initialization
-pub type RedisRepositoryResult<T> = Result<T, api_errors::ServiceError>;
+pub type RedisRepositoryResult<T> = Result<T, RedisRepositoryError>;
 pub type RedisClient = Arc<redis::Client>;
 
 // public function to get a redis client
@@ -16,8 +18,21 @@ pub fn get_redis_client(config: &Config) -> RedisClient {
 #[async_trait::async_trait]
 pub trait RedisRepository: Clone + Send + Sync + 'static {
     async fn ping(&self) -> RedisRepositoryResult<Option<String>>;
+    async fn exists(&self, key: &str) -> RedisRepositoryResult<bool>;
     async fn get(&self, key: &str) -> RedisRepositoryResult<Option<String>>;
     async fn set(&self, key: &str, value: &str) -> RedisRepositoryResult<()>;
+    async fn hset_multiple(
+        &self,
+        key: &str,
+        fields: Vec<(String, String)>,
+    ) -> RedisRepositoryResult<()>;
+    async fn hget_multiple(
+        &self,
+        key: &str,
+        fields: Vec<String>,
+    ) -> RedisRepositoryResult<Vec<Option<String>>>;
+    async fn hget(&self, key: &str, field: &str) -> RedisRepositoryResult<Option<String>>;
+    async fn hset(&self, key: &str, field: &str, value: &str) -> RedisRepositoryResult<()>;
     async fn ttl(&self, key: &str) -> RedisRepositoryResult<i64>;
     async fn update(&self, key: &str, value: &str) -> RedisRepositoryResult<()>;
     async fn update_ttl(&self, key: &str, value: &str, ttl: i64) -> RedisRepositoryResult<()>;
@@ -29,6 +44,15 @@ impl RedisRepository for RedisClient {
     async fn ping(&self) -> RedisRepositoryResult<Option<String>> {
         let mut con = self.get_multiplexed_async_connection().await?;
         redis::cmd("PING")
+            .query_async(&mut con)
+            .await
+            .map_err(|e| e.into())
+    }
+
+    async fn exists(&self, key: &str) -> RedisRepositoryResult<bool> {
+        let mut con = self.get_multiplexed_async_connection().await?;
+        redis::cmd("EXISTS")
+            .arg(key)
             .query_async(&mut con)
             .await
             .map_err(|e| e.into())
@@ -47,6 +71,55 @@ impl RedisRepository for RedisClient {
         let mut con = self.get_multiplexed_async_connection().await?;
         redis::cmd("SET")
             .arg(key)
+            .arg(value)
+            .query_async(&mut con)
+            .await
+            .map_err(|e| e.into())
+    }
+
+    async fn hset_multiple(
+        &self,
+        key: &str,
+        fields: Vec<(String, String)>,
+    ) -> RedisRepositoryResult<()> {
+        let mut conn = self.get_multiplexed_async_connection().await?;
+        redis::cmd("HMSET")
+            .arg(key)
+            .arg(fields)
+            .query_async(&mut conn)
+            .await
+            .map_err(|e| e.into())
+    }
+
+    async fn hget_multiple(
+        &self,
+        key: &str,
+        fields: Vec<String>,
+    ) -> RedisRepositoryResult<Vec<Option<String>>> {
+        let mut conn = self.get_multiplexed_async_connection().await?;
+        redis::cmd("HMGET")
+            .arg(key)
+            .arg(fields)
+            .query_async(&mut conn)
+            .await
+            .map_err(|e| e.into())
+    }
+
+    async fn hget(&self, key: &str, field: &str) -> RedisRepositoryResult<Option<String>> {
+        let mut con = self.get_multiplexed_async_connection().await?;
+        redis::cmd("HGET")
+            .arg(key)
+            .arg(field)
+            .query_async(&mut con)
+            .await
+            .map_err(|e| e.into())
+    }
+
+    async fn hset(&self, key: &str, field: &str, value: &str) -> RedisRepositoryResult<()> {
+        let mut con = self.get_multiplexed_async_connection().await?;
+        redis::cmd("HSET")
+            .arg(key)
+            .arg(field)
             .arg(value)
             .query_async(&mut con)
             .await

@@ -4,12 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+actix-web = { workspace = true }
 async-trait = { workspace = true }
 once_cell = { workspace = true }
 actix-rt = { workspace = true }
+chrono = { workspace = true }
+log = { workspace = true }
 
 api-configs = { path = "../configs" }
-api-errors = { path = "../errors" }
 
 [dependencies.redis]
 version = "*"

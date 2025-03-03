@@ -18,3 +18,4 @@ api-db = { path = "../api/db" }
 api-configs = { path = "../api/configs" }
 api-caches = { path = "../api/caches" }
 api-jobs = { path = "../api/jobs" }
+api-middlewares = { path = "../api/middlewares" }

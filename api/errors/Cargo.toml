@@ -9,5 +9,7 @@ edition = "2021"
 actix-web = { workspace = true }
 reqwest = { workspace = true }
 
+api-caches = { path = "../caches" }
+
 [dependencies.redis]
 version = "*"
