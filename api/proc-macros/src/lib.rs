@@ -8,6 +8,8 @@ extern crate syn;
 
 extern crate proc_macro;
 
+mod internal;
+
 #[proc_macro_derive(Updatable, attributes(updatable))]
 pub fn derive_updatable(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);

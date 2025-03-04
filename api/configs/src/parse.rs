@@ -29,6 +29,12 @@ impl<T: std::cmp::PartialEq> Choices<T> {
         }
     }
 
+    /// set the default value of the environment variable
+    /// throws an error if the value is not in the set of choices
+    /// # Arguments
+    /// * `value` - the value of the environment variable
+    /// # Returns
+    /// * `Self` - the Choices struct with the default value set
     pub fn default(mut self, value: T) -> Self {
         if !self.choices.contains(&value) {
             println!("La valeur par défaut de la variable d'environnement doit être présente dans les choix possibles.");
