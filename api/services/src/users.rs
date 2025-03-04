@@ -18,6 +18,16 @@ impl UsersService {
         }
     }
 
+    /// Get a safe user by id
+    /// SafeUser does not contain sensitive information like password
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The id of the user to get
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing a `SafeUser` if the user was found, or a `ServiceError` if the user was not found
     pub async fn get_safe_user(&self, id: i32) -> Result<SafeUser, ServiceError> {
         self.user_repository
             .get(id)
@@ -25,9 +35,17 @@ impl UsersService {
             .map(|user| SafeUser::from(user))
     }
 
+    /// Destroy a user by id
+    ///
+    /// # Arguments
+    ///
+    /// * `id_user` - The id of the user to destroy
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing `()` if the user was destroyed, or a `ServiceError` if the user was not found
     pub async fn destroy_user(&self, id_user: i32) -> Result<(), ServiceError> {
         self.user_repository.delete(id_user).await?;
-
         Ok(())
     }
 }

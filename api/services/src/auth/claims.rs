@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 
+/// TokenClaims is a default struct that holds the claims of a JWT token.
+/// It includes the subject ID, issued at, and expiration time.
 #[derive(Deserialize, Serialize)]
 pub struct TokenClaims {
     pub sub: i32,

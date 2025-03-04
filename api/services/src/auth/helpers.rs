@@ -3,6 +3,15 @@ use argon2::{
     Argon2, PasswordHash, PasswordVerifier,
 };
 
+/// Hash a password using Argon2
+///
+/// # Arguments
+///
+/// * `password` - The password to hash
+///
+/// # Returns
+///
+/// A `Result` containing the hashed password, or a `ServiceError` if the hashing fails
 pub fn hash_password(password: &str) -> Result<String, crate::auth::errors::AuthentificationError> {
     let salt = SaltString::generate(&mut OsRng);
 
@@ -15,6 +24,16 @@ pub fn hash_password(password: &str) -> Result<String, crate::auth::errors::Auth
     Ok(password_hash)
 }
 
+/// Verify a password against a hash
+///
+/// # Arguments
+///
+/// * `password` - The password to verify
+/// * `hash` - The hash to verify against
+///
+/// # Returns
+///
+/// A `Result` containing `true` if the password is correct, or a `ServiceError` if the password is incorrect
 pub fn verify_password(
     password: &str,
     hash: &PasswordHash,

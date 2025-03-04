@@ -3,6 +3,8 @@ use actix_web_httpauth::extractors::bearer::BearerAuth;
 
 use super::services::validate_token;
 
+/// Validate the token and insert the user id in the request extensions.
+/// Used in the authentication middleware.
 pub async fn validator(
     req: ServiceRequest,
     credentials: BearerAuth,
@@ -12,7 +14,7 @@ pub async fn validator(
             // we give in the request extension the user id for use it in middleware
             req.extensions_mut().insert(token_data.claims.sub);
             Ok(req)
-        } // on peut utiliser ce qui ce trouve dans les claims ici
+        }
         Err(err) => Err((err.into(), req)),
     }
 }
