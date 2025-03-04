@@ -73,7 +73,7 @@ pub async fn replace<R: UserRepository>(
     user_payload: web::Json<UserPayload>,
 ) -> Result<HttpResponse, Error> {
     let user = User::from(NewUserWithId {
-        id: id.clone(),
+        id: *id,
         user: user_payload.into_inner(),
     });
 

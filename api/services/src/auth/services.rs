@@ -47,7 +47,7 @@ impl<U: UserRepository, C: AccessRefreshTokensCache> AuthService<U, C> {
             .get_user_by_email(&user_json.email)
             .await;
 
-        if let Err(_) = user {
+        if user.is_err() {
             // si il y a une erreur avec la base de données
             return Err(ServiceError {
                 message: Some("Authentification failed".to_string()),
@@ -67,8 +67,8 @@ impl<U: UserRepository, C: AccessRefreshTokensCache> AuthService<U, C> {
         let password = user.password.as_ref().unwrap();
 
         let parsed_hash = PasswordHash::new(password)
-            .map_err(|err| AuthentificationError::from(err))
-            .map_err(|err| ServiceError::from(err))?;
+            .map_err(AuthentificationError::from)
+            .map_err(ServiceError::from)?;
 
         if let Err(err) = verify_password(&user_json.password, &parsed_hash) {
             return Err(ServiceError::from(err));
@@ -199,8 +199,7 @@ impl<U: UserRepository, C: AccessRefreshTokensCache> AuthService<U, C> {
             return Err(ServiceError {
                 message: Some("User meta data does not match with registered data".to_string()),
                 error_type: ServiceErrorType::UnAuthorized,
-            }
-            .into());
+            });
         }
 
         let new_refresh_token = generate_refresh_token();
@@ -291,7 +290,7 @@ pub fn decode_token(
     validation.leeway = 1;
 
     decode::<TokenClaims>(
-        &token,
+        token,
         &DecodingKey::from_secret(config.jwt_secret.as_ref()),
         &validation,
     )
@@ -309,5 +308,5 @@ pub fn generate_refresh_token() -> String {
 }
 
 pub fn generate_random_pseudo() -> String {
-    format!("Newbie{}", uuid::Uuid::new_v4().to_string())
+    format!("Newbie{}", uuid::Uuid::new_v4())
 }

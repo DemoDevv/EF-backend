@@ -39,10 +39,10 @@ pub async fn fetch_google_user_info(access_token: &str) -> Result<GoogleUserInfo
         .bearer_auth(access_token)
         .send()
         .await
-        .map_err(|e| ServiceError::from(e))?
+        .map_err(ServiceError::from)?
         .json()
         .await
-        .map_err(|e| ServiceError::from(e))?;
+        .map_err(ServiceError::from)?;
 
     Ok(response)
 }

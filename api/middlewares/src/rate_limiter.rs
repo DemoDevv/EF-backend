@@ -57,7 +57,7 @@ where
         let user_id = req
             .extensions()
             .get::<i32>()
-            .and_then(|el| Some(el.to_string()))
+            .map(|el| el.to_string())
             .unwrap_or(ip);
 
         let bucket_cache = req
@@ -73,26 +73,26 @@ where
                 let exists = bucket_cache
                     .bucket_exists(&user_id)
                     .await
-                    .map_err(|err| ServiceError::from(err))?;
+                    .map_err(ServiceError::from)?;
 
                 if !exists {
                     // we create a new bucket for the user
                     bucket_cache
                         .create_bucket(&user_id)
                         .await
-                        .map_err(|err| ServiceError::from(err))?;
+                        .map_err(ServiceError::from)?;
                 }
 
                 bucket_cache
                     .refill_bucket(&user_id)
                     .await
-                    .map_err(|err| ServiceError::from(err))?;
+                    .map_err(ServiceError::from)?;
 
                 // can consume tokens or return a rate limit exceeded error
                 bucket_cache
                     .consume_tokens(&user_id, &http_method)
                     .await
-                    .map_err(|err| ServiceError::from(err))?;
+                    .map_err(ServiceError::from)?;
             } else {
                 // Handle the case when bucket_cache is None
                 // For example, you can log an error or return a default value

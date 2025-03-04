@@ -29,10 +29,7 @@ impl UsersService {
     ///
     /// A `Result` containing a `SafeUser` if the user was found, or a `ServiceError` if the user was not found
     pub async fn get_safe_user(&self, id: i32) -> Result<SafeUser, ServiceError> {
-        self.user_repository
-            .get(id)
-            .await
-            .map(|user| SafeUser::from(user))
+        self.user_repository.get(id).await.map(SafeUser::from)
     }
 
     /// Destroy a user by id

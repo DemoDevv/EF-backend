@@ -151,7 +151,7 @@ impl TokenBucketsCache for TokenBucketsCacheRedis {
         self.client
             .hset_multiple(&format!("{}:{}", self.prefix, id), bucket.into())
             .await
-            .map_err(|err| RateLimitError::from(err))
+            .map_err(RateLimitError::from)
     }
 
     /// Creates a new token bucket in Redis with default values.
@@ -166,7 +166,7 @@ impl TokenBucketsCache for TokenBucketsCacheRedis {
                 TokenBucket::default().into(),
             )
             .await
-            .map_err(|err| RateLimitError::from(err))
+            .map_err(RateLimitError::from)
     }
 
     /// Checks if a token bucket exists in Redis.
@@ -177,7 +177,7 @@ impl TokenBucketsCache for TokenBucketsCacheRedis {
         self.client
             .exists(&format!("{}:{}", self.prefix, id))
             .await
-            .map_err(|err| RateLimitError::from(err))
+            .map_err(RateLimitError::from)
     }
 
     /// Refills an existing token bucket and updates Redis.
@@ -253,10 +253,10 @@ mod tests {
     use super::*;
     use once_cell::sync::Lazy;
 
-    const CONFIG: Lazy<api_configs::config::Config> =
-        Lazy::new(|| api_configs::config::Config::init());
+    static CONFIG: Lazy<api_configs::config::Config> = Lazy::new(api_configs::config::Config::init);
     #[allow(dead_code)]
-    const CLIENT: Lazy<RedisClient> = Lazy::new(|| crate::redis::get_redis_client(&CONFIG.clone()));
+    static CLIENT: Lazy<RedisClient> =
+        Lazy::new(|| crate::redis::get_redis_client(&CONFIG.clone()));
 
     #[actix_rt::test]
     async fn test_create_default_token_bucket() {

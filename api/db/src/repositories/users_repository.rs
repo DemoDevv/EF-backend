@@ -148,8 +148,7 @@ mod tests {
     use once_cell::sync::Lazy;
 
     #[allow(dead_code)]
-    const CONFIG: Lazy<api_configs::config::Config> =
-        Lazy::new(|| api_configs::config::Config::init());
+    static CONFIG: Lazy<api_configs::config::Config> = Lazy::new(api_configs::config::Config::init);
 
     #[actix_rt::test]
     async fn test_update_user() {
