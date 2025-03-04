@@ -1,8 +1,8 @@
-# EF-backend 
+# EF-backend
 
 Ce projet est une application web construite avec le framework Actix-web en Rust. Il utilise l'ORM Diesel pour interagir avec une base de données PostgreSQL et implémente une authentification basée sur des tokens JWT et OAuth2.0.
 
-## Structure du projet 
+## Structure du projet
 
 Le projet est organisé en plusieurs modules principaux :
 
@@ -14,6 +14,8 @@ Le projet est organisé en plusieurs modules principaux :
 - [`handlers`](api/handlers/): Contient les gestionnaires pour les différentes routes de l'API.
 - [`jobs`](api/jobs/): Contient les jobs asynchrones.
 - [`middlewares`](api/middlewares/): Définit les middlewares personnalisés.
+- [`model-traits`](api/model-traits/): Définit les traits pour les modèles.
+- [`proc-macros`](api/proc-macros/): Définit les proc macros personnalisés.
 - [`services`](api/services/): Définit les services utilisés dans les handlers.
 - [`types`](api/types/): Définit les types personnalisés utilisés dans l'application.
 
@@ -24,15 +26,15 @@ Le projet est organisé en plusieurs modules principaux :
 - Middleware pour la validation des tokens JWT.
 - Gestion des erreurs personnalisée.
 
-Si vous voulez commencer avec le rechargement à chaud, utilisez cette commande dans votre terminal:  
+Si vous voulez commencer avec le rechargement à chaud, utilisez cette commande dans votre terminal:
 `cargo watch -q -c -w src/ -x run`
 
 ## Améliorations futures
 
-- [ ] **Pagination** : Ajouter une pagination aux endpoints qui renvoient plusieurs utilisateurs pour mieux gérer un grand nombre d'utilisateurs.  
-- [ ] **Tests plus complets** : Ajouter des tests d'intégration et des tests de bout en bout pour renforcer la couverture des tests.  
-- [ ] **Journalisation** : Améliorer la journalisation pour faciliter le débogage et suivre plus précisément l'exécution de l'application.  
-- [ ] **Documentation de l'API** : Documenter les endpoints d'API, par exemple en utilisant Swagger, pour faciliter l'utilisation par d'autres développeurs (ou soi-même plus tard).  
+- [ ] **Pagination** : Ajouter une pagination aux endpoints qui renvoient plusieurs utilisateurs pour mieux gérer un grand nombre d'utilisateurs.
+- [ ] **Tests plus complets** : Ajouter des tests d'intégration et des tests de bout en bout pour renforcer la couverture des tests.
+- [x] **Journalisation** : Améliorer la journalisation pour faciliter le débogage et suivre plus précisément l'exécution de l'application.
+- [ ] **Documentation de l'API** : Documenter les endpoints d'API, par exemple en utilisant Swagger, pour faciliter l'utilisation par d'autres développeurs (ou soi-même plus tard).
 
 ## Comment exécuter le projet
 
@@ -44,6 +46,6 @@ Si vous voulez commencer avec le rechargement à chaud, utilisez cette commande 
 
 ## Tests
 
-Il est nécessaire d'avoir créé une base de données uniquement pour les tests et d'avoir configuré la variable d'environnement DATABASE_TEST_URL.  
+Il est nécessaire d'avoir créé une base de données uniquement pour les tests et d'avoir configuré la variable d'environnement DATABASE_TEST_URL.
 
 Pour exécuter les tests, utilisez la commande `cargo test`.
